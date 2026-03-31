@@ -1,7 +1,7 @@
 public enum CardType
 {
     Creature,
-    Vuilding,
+    Building,
     Spell
 }
 

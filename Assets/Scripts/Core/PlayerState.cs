@@ -193,7 +193,7 @@ public class PlayerState
         }   
     }
 
-    public void DiscardSpeel(CardInstance spell)
+    public void DiscardSpell(CardInstance spell)
     {
         Hand.Remove(spell);
         Discard.Add(spell);
