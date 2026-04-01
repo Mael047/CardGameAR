@@ -20,8 +20,6 @@ public class ActionsPanel : MonoBehaviour
     [Header("Instrucciones")]
     [SerializeField] private TMP_Text textInstruction;
 
-    // BUG CORREGIDO: referencia directa al HandPanel en lugar de buscarlo
-    // con GetComponent en el Canvas (donde no está)
     [Header("Referencias")]
     [SerializeField] private HandPanel handPanel;
 
@@ -143,7 +141,6 @@ public class ActionsPanel : MonoBehaviour
     private void OnCancelPressed()
     {
         HideCardOptions();
-        // BUG CORREGIDO: usa la referencia directa en lugar de GetComponent en el Canvas
         handPanel?.Deselect();
     }
 

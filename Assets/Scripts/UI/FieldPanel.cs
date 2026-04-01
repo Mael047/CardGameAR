@@ -16,8 +16,6 @@ public class FieldPanel : MonoBehaviour
     }
     private void HandleGameReady(GameState state)
     {
-        // Solo configura los carriles una vez — la primera vez que recibe un estado
-        // Luego se desuscribe para no repetir el setup en cada cambio de estado
         GameEvents.OnGameStateChanged -= HandleGameReady;
         GameEvents.OnGameStateChanged += HandleStateChanged;
 

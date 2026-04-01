@@ -26,10 +26,7 @@ public class GameManager : MonoBehaviour
             return;
         }
         Instance = this;
-        // BUG CORREGIDO: DontDestroyOnLoad se removió porque al recargar la escena
-        // con SceneManager.LoadScene (botón Restart), el GameManager viejo sobrevivía
-        // y el nuevo era destruido — quedaba una instancia con estado corrupto.
-        // Como todo el juego ocurre en una sola escena, no es necesario.
+
     }
 
     private void Start()
@@ -79,10 +76,6 @@ public class GameManager : MonoBehaviour
     private void HandleTurnStart()
     {
         ReadyAllCards();
-
-        // BUG CORREGIDO: EvaluateContinuousPassives() nunca era llamado.
-        // Debe ejecutarse al inicio del turno, después de ReadyUp(),
-        // para que los bonos se apliquen con el estado fresco (sin bonos del turno anterior).
         EvaluateContinuousPassives();
 
         CardInstance drawn = ActivePlayer.DrawCard();
@@ -427,8 +420,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // BUG CORREGIDO: este método existía pero nunca era llamado.
-    // Ahora se llama en HandleTurnStart() después de ReadyAllCards().
     private void EvaluateContinuousPassives()
     {
         for (int i = 0; i < 3; i++)

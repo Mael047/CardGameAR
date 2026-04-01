@@ -1,7 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-// REMOVIDO: using UnityEditor — causa errores en builds de producción,
-// solo debe usarse en scripts de herramientas del editor
 
 public class PlayerState
 {
@@ -76,8 +74,6 @@ public class PlayerState
 
         CardInstance drawn = Deck.Pop();
         Hand.Add(drawn);
-        // BUG CORREGIDO: el log original decía Hand.Count en lugar de Deck.Count
-        // mostrando el tamaño de la mano como "cartas en el mazo", confuso para debug
         Debug.Log($"{PlayerName} draws {drawn.Data.cardName}. Cards left in deck: {Deck.Count}");
         return drawn;
     }
@@ -139,8 +135,6 @@ public class PlayerState
             Debug.Log($"{PlayerName}: {replaced.Data.cardName} reemplazada en carril {laneIndex}.");
         }
 
-        // BUG CORREGIDO: el original llamaba Hand.Remove(creature) solo dentro del if
-        // de reemplazo, pero la carta siempre debe salir de la mano al jugarse
         Hand.Remove(creature);
         CreatureLanes[laneIndex] = creature;
         creature.PlaceInLane(laneIndex);
