@@ -24,6 +24,6 @@ MonoBehaviour:
   abilityType: 1
   abilityActionCost: 0
   abilityDescription: Si hay un edificio en este carril, gana +1 ATK
-  creaturePrefab: {fileID: 0}
+  creaturePrefab: {fileID: 5799886891955246983, guid: 6d62a1d476b1ec34d8f6c62499916d27, type: 3}
   floopAnimation: {fileID: 0}
   spellEffect: {fileID: 0}
