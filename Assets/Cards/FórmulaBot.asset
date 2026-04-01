@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ae9c2949be209d445a650d2062ad435e, type: 3}
-  m_Name: CandyWarrior
+  m_Name: "F\xF3rmulaBot"
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: Candy Warrior
+  cardName: "F\xF3rmula Bot"
   qrID: QR_001
-  cardArtwork: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
+  cardArtwork: {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
   cardType: 0
-  actionCost: 1
+  actionCost: 2
   landscapeRequired: 0
-  landscapeAmount: 1
-  attack: 2
+  landscapeAmount: 2
+  attack: 3
   defense: 3
-  abilityType: 1
-  abilityActionCost: 0
-  abilityDescription: Si hay un edificio en este carril, gana +1 ATK
+  abilityType: 2
+  abilityActionCost: 1
+  abilityDescription: 
   creaturePrefab: {fileID: 0}
   floopAnimation: {fileID: 0}
   spellEffect: {fileID: 0}

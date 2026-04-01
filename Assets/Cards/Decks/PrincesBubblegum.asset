@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d18cba09d9a77c4e96b54abff07abc5, type: 3}
+  m_Name: PrincesBubblegum
+  m_EditorClassIdentifier: Assembly-CSharp::DeckData
+  deckName: Princess Bubblegum
+  deckPortrait: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  cards:
+  - {fileID: 11400000, guid: faab9dbd476462c4fa61385da2e09a98, type: 2}
+  - {fileID: 11400000, guid: 87ea3263bd67f8641820ed1f5b9c48c7, type: 2}
+  - {fileID: 11400000, guid: d69b658ebf20442429e3dea5e4b1db78, type: 2}
+  - {fileID: 11400000, guid: ab69e0623abcdca40b2b1ae41e2afd89, type: 2}
+  - {fileID: 11400000, guid: 9ff382abce3c5584cb291276a670602f, type: 2}
+  - {fileID: 11400000, guid: e4c49e7ce83bcd34987454dbd9740cba, type: 2}
+  landscapes: 000000000000000001000000

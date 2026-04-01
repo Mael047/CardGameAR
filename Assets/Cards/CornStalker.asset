@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ae9c2949be209d445a650d2062ad435e, type: 3}
-  m_Name: CandyWarrior
+  m_Name: CornStalker
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: Candy Warrior
-  qrID: QR_001
-  cardArtwork: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
+  cardName: Corn Stalker
+  qrID: QR_003
+  cardArtwork: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
   cardType: 0
   actionCost: 1
-  landscapeRequired: 0
+  landscapeRequired: 1
   landscapeAmount: 1
-  attack: 2
-  defense: 3
+  attack: 3
+  defense: 2
   abilityType: 1
   abilityActionCost: 0
-  abilityDescription: Si hay un edificio en este carril, gana +1 ATK
+  abilityDescription: Roba una carta al entrar al campo
   creaturePrefab: {fileID: 0}
   floopAnimation: {fileID: 0}
   spellEffect: {fileID: 0}
