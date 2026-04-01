@@ -38,15 +38,21 @@ public class PlayerState
         Landscapes = new LandscapeType[3];
 
         for (int i = 0; i < 3; i++)
-            Landscapes[i] = deckdata.landscapes[i];
+            Landscapes[i] = LandscapeType.Rainbow;
 
         BuildDeck();
+    }
+
+    // Nuevo: llamado por SetupPanel cuando el jugador confirma sus paisajes
+    public void SetLandscape(int laneIndex, LandscapeType landscape)
+    {
+        Landscapes[laneIndex] = landscape;
+        Debug.Log($"{PlayerName}: carril {laneIndex} → {landscape}");
     }
 
     private void BuildDeck()
     {
         List<CardInstance> tempList = new List<CardInstance>();
-
         foreach (CardData cardData in DeckData.cards)
             tempList.Add(new CardInstance(cardData));
 
@@ -71,10 +77,9 @@ public class PlayerState
             Debug.LogWarning($"{PlayerName}: mazo vacío.");
             return null;
         }
-
         CardInstance drawn = Deck.Pop();
         Hand.Add(drawn);
-        Debug.Log($"{PlayerName} draws {drawn.Data.cardName}. Cards left in deck: {Deck.Count}");
+        Debug.Log($"{PlayerName} roba {drawn.Data.cardName}. Mazo: {Deck.Count}");
         return drawn;
     }
 
@@ -84,42 +89,34 @@ public class PlayerState
             DrawCard();
     }
 
-    public bool CanAfford(int cost)
-    {
-        return ActionsRemaining >= cost;
-    }
+    public bool CanAfford(int cost) => ActionsRemaining >= cost;
 
     public bool SpendActions(int amount)
     {
         if (!CanAfford(amount))
         {
-            Debug.LogWarning($"{PlayerName}: no tiene {amount} acciones (tiene {ActionsRemaining}).");
+            Debug.LogWarning($"{PlayerName}: no tiene {amount} acciones.");
             return false;
         }
         ActionsRemaining -= amount;
         return true;
     }
 
-    public void RestoreActions()
-    {
-        ActionsRemaining = ACTIONS_PER_TURN;
-    }
+    public void RestoreActions() => ActionsRemaining = ACTIONS_PER_TURN;
 
     public void TakeDamage(int amount)
     {
         CurrentHP = Mathf.Max(0, CurrentHP - amount);
-        Debug.Log($"{PlayerName} recibió {amount} de daño. HP: {CurrentHP}/{MAX_HP}");
+        Debug.Log($"{PlayerName}: {amount} de daño. HP: {CurrentHP}/{MAX_HP}");
     }
 
     public bool MeetsLandscapeRequirement(CardData card)
     {
-        if (card.landscapeRequired == LandscapeType.Rainbow)
-            return true;
+        if (card.landscapeRequired == LandscapeType.Rainbow) return true;
 
         int count = 0;
-        foreach (LandscapeType landscape in Landscapes)
-            if (landscape == card.landscapeRequired)
-                count++;
+        foreach (LandscapeType l in Landscapes)
+            if (l == card.landscapeRequired) count++;
 
         return count >= card.landscapeAmount;
     }
@@ -138,8 +135,7 @@ public class PlayerState
         Hand.Remove(creature);
         CreatureLanes[laneIndex] = creature;
         creature.PlaceInLane(laneIndex);
-        Debug.Log($"{PlayerName}: {creature.Data.cardName} colocada en carril {laneIndex}.");
-
+        Debug.Log($"{PlayerName}: {creature.Data.cardName} en carril {laneIndex}.");
         return replaced;
     }
 
@@ -151,12 +147,11 @@ public class PlayerState
         {
             replaced.RemoveFromField();
             Discard.Add(replaced);
-            Debug.Log($"{PlayerName}: {replaced.Data.cardName} (edificio) reemplazado.");
         }
 
+        Hand.Remove(building);
         BuildingLanes[laneIndex] = building;
         building.PlaceInLane(laneIndex);
-        Hand.Remove(building);
         return replaced;
     }
 
@@ -164,7 +159,6 @@ public class PlayerState
     {
         CardInstance creature = CreatureLanes[laneIndex];
         if (creature == null) return;
-
         creature.RemoveFromField();
         Discard.Add(creature);
         CreatureLanes[laneIndex] = null;
@@ -175,6 +169,5 @@ public class PlayerState
     {
         Hand.Remove(spell);
         Discard.Add(spell);
-        Debug.Log($"{PlayerName}: {spell.Data.cardName} descartado.");
     }
 }

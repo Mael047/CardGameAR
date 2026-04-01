@@ -56,6 +56,12 @@ public class UIManager : MonoBehaviour
             actionsPanel.UpdateActionCount(
                 GameManager.Instance.ActivePlayer.ActionsRemaining);
         }
+
+        bool isPlaying = newState != GameState.Setup;
+        handPanel.gameObject.SetActive(isPlaying);
+        fieldPanel.gameObject.SetActive(isPlaying);
+        actionsPanel.gameObject.SetActive(isPlaying);
+        gameInfoPanel.gameObject.SetActive(isPlaying);
     }
 
     private void HandleHPChanged(int playerIndex, int newHP)

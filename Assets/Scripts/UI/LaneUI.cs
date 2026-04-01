@@ -69,9 +69,9 @@ public class LaneUI : MonoBehaviour
             if (textCreatureState != null)
                 textCreatureState.text = creature.CurrentState switch
                 {
-                    CardState.Ready => "✅ Ready",
-                    CardState.Flooped => "🌀 Flooped",
-                    CardState.Exhausted => "😴 Exhausted",
+                    CardState.Ready => "Ready",
+                    CardState.Flooped => "Flooped",
+                    CardState.Exhausted => "Exhausted",
                     _ => ""
                 };
 
