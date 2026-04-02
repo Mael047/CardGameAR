@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CornStalker
   m_EditorClassIdentifier: Assembly-CSharp::CardData
   cardName: Corn Stalker
-  qrID: QR_003
+  qrID: QR_002
   cardArtwork: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
   cardType: 0
   actionCost: 1
@@ -24,6 +24,6 @@ MonoBehaviour:
   abilityType: 1
   abilityActionCost: 0
   abilityDescription: Roba una carta al entrar al campo
-  creaturePrefab: {fileID: 0}
+  creaturePrefab: {fileID: 171927380109893388, guid: 5d7684771e792e94193ec77a888de3ad, type: 3}
   floopAnimation: {fileID: 0}
   spellEffect: {fileID: 0}
