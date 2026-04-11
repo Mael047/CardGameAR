@@ -168,16 +168,39 @@ public class ARManager : MonoBehaviour
 
         string qrID = card.Data.qrID;
         if (activeTrackers.TryGetValue(qrID, out ARCardTracker tracker))
-            tracker.RefreshVisual();
+        {
+            // BUSCAMOS EL COMPONENTE VISUAL QUE SÍ TIENE LA FUNCIÓN
+            var visual = tracker.GetComponent<ARCardVisual>();
+            if (visual != null)
+            {
+                visual.UpdateVisual(card); // Nota: En tu ARCardVisual se llama UpdateVisual
+            }
+        }
     }
 
     // Refresca todos los trackers activos de una vez
     private void RefreshAllTrackers()
     {
         foreach (var kvp in activeTrackers)
-            kvp.Value?.RefreshVisual();
+        {
+            ARCardTracker tracker = kvp.Value;
+            if (tracker == null) continue;
+
+            // Buscamos la lógica de la carta
+            CardInstance instance = FindCardInstance(tracker.qrID);
+
+            // Buscamos el componente visual en el objeto detectado
+            ARCardVisual visual = tracker.GetComponent<ARCardVisual>();
+
+            if (instance != null && visual != null)
+            {
+                visual.UpdateVisual(instance);
+            }
+        }
     }
 
     // Devuelve cuántos trackers están activos (útil para debug)
     public int ActiveTrackerCount => activeTrackers.Count;
+
+
 }

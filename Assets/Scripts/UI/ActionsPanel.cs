@@ -128,49 +128,14 @@ public class ActionsPanel : MonoBehaviour
     // ── Carril presionado en el campo ─────────────────────────────────────
     public void OnLaneSelected(int playerIndex, int laneIndex)
     {
-        if (playerIndex != GameManager.Instance.ActivePlayerIndex) return;
-
-        CardInstance existingCreature =
-            GameManager.Instance.Players[playerIndex].CreatureLanes[laneIndex];
-
-        // Si hay criatura y NO estoy colocando una carta → abrir panel de campo
-        if (existingCreature != null && pendingCard == null)
+        // Solo si es nuestro turno y nuestro carril
+        if (playerIndex == GameManager.Instance.ActivePlayerIndex)
         {
-            ShowFieldCardOptions(existingCreature, laneIndex);
-            return;
-        }
+            // Le decimos al Manager de AR que el siguiente QR que vea va a este carril
+            ARPlacementManager.Instance.SetWaitingLane(laneIndex);
 
-        // Si estoy colocando una carta desde la mano → colocarla
-        if (!expectingLaneSelection || pendingCard == null) return;
-
-        bool success = false;
-        switch (pendingCard.Data.cardType)
-        {
-            case CardType.Creature:
-                success = GameManager.Instance.TryPlayCreature(pendingCard, laneIndex);
-                break;
-            case CardType.Building:
-                success = GameManager.Instance.TryPlayBuilding(pendingCard, laneIndex);
-                break;
-        }
-
-        if (success)
-        {
-            HideCardOptions();
-            UpdateActionCount(GameManager.Instance.ActivePlayer.ActionsRemaining);
-            SetInstruction("Carta jugada.");
-        }
-        else
-        {
-            // Mensaje de error específico según la causa
-            PlayerState p = GameManager.Instance.ActivePlayer;
-            if (!p.CanAfford(pendingCard.Data.actionCost))
-                SetInstruction("No tienes acciones suficientes.");
-            else if (!p.MeetsLandscapeRequirement(pendingCard.Data))
-                SetInstruction($"Necesitas paisaje '{pendingCard.Data.landscapeRequired}' " +
-                               $"x{pendingCard.Data.landscapeAmount} para jugar esta carta.");
-            else
-                SetInstruction("Jugada inválida.");
+            // Opcional: Mostrar un mensaje en pantalla para el usuario
+            SetInstruction($"Escanea tu carta para el Carril {laneIndex + 1}");
         }
     }
 

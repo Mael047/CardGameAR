@@ -6,9 +6,13 @@ public class ARCardTracker : MonoBehaviour
     [Header("Identidad")]
     public string qrID;
 
+    private bool hasBeenPlayed = false; // Nueva bandera de control
+
     [Header("Detección de Floop por orientación")]
     [Range(30f, 80f)]
     public float floopAngleThreshold = 60f;
+
+    private bool hasBeenPlaced = false;
 
     // ── Referencias internas ──────────────────────────────────────────────
     private ObserverBehaviour observer;
@@ -37,12 +41,17 @@ public class ARCardTracker : MonoBehaviour
     {
         if (observer != null)
             observer.OnTargetStatusChanged += OnStatusChanged;
+        GameEvents.OnTurnChanged += OnTurnChanged;
+
     }
 
     private void OnDisable()
     {
         if (observer != null)
             observer.OnTargetStatusChanged -= OnStatusChanged;
+
+        // Es vital desconectarlo también al destruir o desactivar
+        GameEvents.OnTurnChanged -= OnTurnChanged;
     }
 
     // ── Update: corre cada frame mientras la carta es visible ─────────────
@@ -61,20 +70,23 @@ public class ARCardTracker : MonoBehaviour
     // ── Callback de Vuforia ───────────────────────────────────────────────
     private void OnStatusChanged(ObserverBehaviour behaviour, TargetStatus status)
     {
-        bool nowTracked = status.Status == Status.TRACKED ||
-                          status.Status == Status.EXTENDED_TRACKED;
+        bool isTracked = status.Status == Status.TRACKED || status.Status == Status.EXTENDED_TRACKED;
 
-        if (nowTracked && !IsTracked)
+        if (isTracked && !hasBeenPlayed)
         {
-            IsTracked = true;
-            floopTriggeredThisDetection = false;
-            OnCardDetected();
+            // Solo intentamos colocarla si no ha sido jugada en este turno
+            Vector3 worldPos = transform.position;
+            ARPlacementManager.Instance.TryPlaceCard(qrID, worldPos);
+
+            // Si TryPlaceCard tiene éxito, deberíamos marcarla
+            hasBeenPlayed = true;
         }
-        else if (!nowTracked && IsTracked)
-        {
-            IsTracked = false;
-            OnCardLost();
-        }
+    }
+
+    private void OnTurnChanged(int activePlayerIndex)
+    {
+        hasBeenPlayed = false;
+        Debug.Log($"Tracker [{qrID}] reseteado para el nuevo turno.");
     }
 
     // ── Carta detectada ───────────────────────────────────────────────────
@@ -82,12 +94,25 @@ public class ARCardTracker : MonoBehaviour
     {
         Debug.Log($"Carta detectada: {qrID}");
         trackedCardInstance = ARManager.Instance.FindCardInstance(qrID);
-
         ARManager.Instance.RegisterTracker(qrID, this);
 
-        // Spawna el visual solo si no hay uno ya (evita duplicados)
+        // Si aún no está en un carril, intentamos posicionarla
+        if (trackedCardInstance != null && trackedCardInstance.LaneIndex == -1)
+        {
+            // IMPORTANTE: Pasamos la posición de la carta al manager
+            ARPlacementManager.Instance.TryPlaceCard(qrID, transform.position);
+        }
+
         if (spawnedVisual == null)
             SpawnVisual();
+
+        Debug.Log($"Carta detectada físicamente: {qrID}");
+
+        // Notificamos al manager. Si el manager está esperando este QR, la posicionará.
+        ARPlacementManager.Instance.TryPlaceCard(qrID, transform.position);
+
+        // El resto de tu lógica de registro de trackers...
+        ARManager.Instance.RegisterTracker(qrID, this);
     }
 
     // ── Carta perdida ─────────────────────────────────────────────────────
