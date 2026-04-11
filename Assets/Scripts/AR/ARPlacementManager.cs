@@ -25,14 +25,12 @@ public class ARPlacementManager : MonoBehaviour
     // Paso 2: El ARCardTracker llama a esto cuando detecta la tarjeta
     public void TryPlaceCard(string qrID, Vector3 worldPosition)
     {
-        // 1. Verificamos que se haya seleccionado un carril previamente en la UI
         if (waitingLaneIndex == -1)
         {
             Debug.LogWarning("AR: Se detectó una carta, pero no hay un carril seleccionado en la UI.");
             return;
         }
 
-        // 2. Buscamos la instancia de la carta en la mano
         CardInstance cardInHand = FindCardInHand(qrID);
         if (cardInHand == null)
         {
@@ -40,16 +38,35 @@ public class ARPlacementManager : MonoBehaviour
             return;
         }
 
-        // 3. Intentamos jugar la carta directamente en el carril de la UI
-        // Ya NO usamos worldPosition ni GetClosestLane
-        bool success = GameManager.Instance.TryPlayCreature(cardInHand, waitingLaneIndex);
+        // --- NUEVA LÓGICA INTELIGENTE ---
+        bool success = false;
+
+        switch (cardInHand.Data.cardType)
+        {
+            case CardType.Creature:
+                success = GameManager.Instance.TryPlayCreature(cardInHand, waitingLaneIndex);
+                break;
+
+            case CardType.Building:
+                success = GameManager.Instance.TryPlayBuilding(cardInHand, waitingLaneIndex);
+                break;
+
+            case CardType.Spell:
+                // Los hechizos normalmente no necesitan carril, pero si tu juego lo permite,
+                // puedes pasarlo aquí o llamar a TryPlaySpell(cardInHand)
+                success = GameManager.Instance.TryPlaySpell(cardInHand);
+                break;
+
+            default:
+                Debug.LogWarning($"AR: Tipo de carta desconocido: {cardInHand.Data.cardType}");
+                break;
+        }
+        // --------------------------------
 
         if (success)
         {
             Debug.Log($"AR: {cardInHand.Data.cardName} jugada con éxito en el carril {waitingLaneIndex}!");
-
-            // IMPORTANTE: Reseteamos el carril de espera para la siguiente jugada
-            waitingLaneIndex = -1;
+            waitingLaneIndex = -1; // Reset
         }
     }
 

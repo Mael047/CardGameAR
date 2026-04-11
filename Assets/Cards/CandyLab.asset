@@ -24,6 +24,6 @@ MonoBehaviour:
   abilityType: 1
   abilityActionCost: 0
   abilityDescription: 
-  creaturePrefab: {fileID: 0}
+  creaturePrefab: {fileID: 171927380109893388, guid: 5dc599c5fb715514ebf6b59307c19a85, type: 3}
   floopAnimation: {fileID: 0}
   spellEffect: {fileID: 0}

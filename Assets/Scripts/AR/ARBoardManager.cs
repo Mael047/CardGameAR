@@ -9,12 +9,13 @@ public class ARBoardManager : MonoBehaviour
     public Transform[] player1Lanes = new Transform[3];
     public Transform[] player2Lanes = new Transform[3];
 
-    private GameObject[] p1Spawned = new GameObject[3];
-    private GameObject[] p2Spawned = new GameObject[3];
+    private GameObject[] p1SpawnedCreatures = new GameObject[3];
+    private GameObject[] p1SpawnedBuildings = new GameObject[3];
+    private GameObject[] p2SpawnedCreatures = new GameObject[3];
+    private GameObject[] p2SpawnedBuildings = new GameObject[3];
 
     private ObserverBehaviour observer;
     private bool isTracked = false;
-    private bool boardLocked = false;
 
     private void Awake()
     {
@@ -64,48 +65,45 @@ public class ARBoardManager : MonoBehaviour
     {
         if (GameManager.Instance == null) return;
 
-        // ¿Estás seguro de que esta lista tiene los 2 jugadores?
         var players = GameManager.Instance.Players;
-
-        // Si players[1] es el Jugador 2, ¿se está enviando player2Lanes?
-        UpdatePlayerLanes(players[0], player1Lanes, p1Spawned);
-        UpdatePlayerLanes(players[1], player2Lanes, p2Spawned);
+        // Ahora pasamos ambos arrays de objetos spawneados
+        UpdatePlayerLanes(players[0], player1Lanes, p1SpawnedCreatures, p1SpawnedBuildings);
+        UpdatePlayerLanes(players[1], player2Lanes, p2SpawnedCreatures, p2SpawnedBuildings);
     }
 
-    private void UpdatePlayerLanes(PlayerState player, Transform[] anchors, GameObject[] spawned)
+    private void UpdatePlayerLanes(PlayerState player, Transform[] anchors, GameObject[] spawnedCreatures, GameObject[] spawnedBuildings)
     {
         for (int i = 0; i < 3; i++)
         {
-            CardInstance card = player.CreatureLanes[i];
+            // Procesar Criatura
+            HandleCardVisual(player.CreatureLanes[i], anchors[i], ref spawnedCreatures[i], new Vector3(0, 0.05f, 0));
 
-            if (card == null)
-            {
-                if (spawned[i] != null) { Destroy(spawned[i]); spawned[i] = null; }
-                continue;
-            }
-
-            if (spawned[i] != null)
-            {
-                // Solo actualizamos el visual (HP, estado Ready/Floop)
-                spawned[i].GetComponent<ARCardVisual>()?.UpdateVisual(card);
-                continue;
-            }
-
-            // CREACIÓN PERSISTENTE:
-            GameObject prefab = card.Data.creaturePrefab;
-            if (prefab != null)
-            {
-                // Se instancia como hijo del carril. 
-                // Como el carril es hijo del Board (Vuforia), se moverá con el tablero.
-                spawned[i] = Instantiate(prefab, anchors[i]);
-                spawned[i].transform.localPosition = new Vector3(0f, 0.02f, 0f); // Un poco elevado
-                spawned[i].transform.localRotation = Quaternion.identity;
-
-                spawned[i].GetComponent<ARCardVisual>()?.UpdateVisual(card);
-            }
+            // Procesar Edificio (con un pequeño offset lateral o de altura para que no se solapen)
+            HandleCardVisual(player.BuildingLanes[i], anchors[i], ref spawnedBuildings[i], new Vector3(0.1f, 0.02f, 0));
         }
     }
 
+    private void HandleCardVisual(CardInstance card, Transform anchor, ref GameObject spawnedObj, Vector3 offset)
+    {
+        if (card == null)
+        {
+            if (spawnedObj != null) { Destroy(spawnedObj); spawnedObj = null; }
+            return;
+        }
+
+        if (spawnedObj == null)
+        {
+            GameObject prefab = card.Data.creaturePrefab;
+            if (prefab != null)
+            {
+                spawnedObj = Instantiate(prefab, anchor);
+                spawnedObj.transform.localPosition = offset;
+                spawnedObj.transform.localRotation = Quaternion.identity;
+            }
+        }
+
+        spawnedObj?.GetComponent<ARCardVisual>()?.UpdateVisual(card);
+    }
     private void OnCardChanged(int playerIndex, int laneIndex, CardInstance card) => RefreshBoard();
     private void OnCardRemoved(int playerIndex, int laneIndex) => RefreshBoard();
     private void OnTurnChanged(int activePlayerIndex) => RefreshBoard();

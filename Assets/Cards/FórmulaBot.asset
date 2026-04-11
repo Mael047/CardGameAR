@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: "F\xF3rmulaBot"
   m_EditorClassIdentifier: Assembly-CSharp::CardData
   cardName: "F\xF3rmula Bot"
-  qrID: QR_001
+  qrID: QR_003
   cardArtwork: {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
   cardType: 0
   actionCost: 2

@@ -12,8 +12,6 @@ public class ARCardTracker : MonoBehaviour
     [Range(30f, 80f)]
     public float floopAngleThreshold = 60f;
 
-    private bool hasBeenPlaced = false;
-
     // ── Referencias internas ──────────────────────────────────────────────
     private ObserverBehaviour observer;
 

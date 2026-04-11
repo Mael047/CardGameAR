@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ScienceBlast
   m_EditorClassIdentifier: Assembly-CSharp::CardData
   cardName: Science Blast
-  qrID: QE_S01
+  qrID: QR_S01
   cardArtwork: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   cardType: 2
   actionCost: 2
@@ -24,6 +24,6 @@ MonoBehaviour:
   abilityType: 2
   abilityActionCost: 0
   abilityDescription: "Inflije 2 de da\xF1o"
-  creaturePrefab: {fileID: 0}
+  creaturePrefab: {fileID: 171927380109893388, guid: 5dc599c5fb715514ebf6b59307c19a85, type: 3}
   floopAnimation: {fileID: 0}
   spellEffect: {fileID: 0}

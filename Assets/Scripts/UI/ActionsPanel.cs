@@ -137,6 +137,31 @@ public class ActionsPanel : MonoBehaviour
             // Opcional: Mostrar un mensaje en pantalla para el usuario
             SetInstruction($"Escanea tu carta para el Carril {laneIndex + 1}");
         }
+
+        if (!expectingLaneSelection || pendingCard == null) return;
+
+        bool success = false;
+
+        if (pendingCard.Data.cardType == CardType.Creature)
+        {
+            success = GameManager.Instance.TryPlayCreature(pendingCard, laneIndex);
+        }
+        else if (pendingCard.Data.cardType == CardType.Building)
+        {
+            success = GameManager.Instance.TryPlayBuilding(pendingCard, laneIndex);
+        }
+        // ------------------------------------
+
+        if (success)
+        {
+            HideCardOptions();
+            UpdateActionCount(GameManager.Instance.ActivePlayer.ActionsRemaining);
+            SetInstruction("Carta jugada.");
+        }
+        else
+        {
+            // ... (tus mensajes de error)
+        }
     }
 
     // ── Handlers ─────────────────────────────────────────────────────────
