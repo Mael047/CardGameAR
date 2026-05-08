@@ -15,10 +15,5 @@ MonoBehaviour:
   deckName: Princess Bubblegum
   deckPortrait: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   cards:
-  - {fileID: 11400000, guid: faab9dbd476462c4fa61385da2e09a98, type: 2}
-  - {fileID: 11400000, guid: 87ea3263bd67f8641820ed1f5b9c48c7, type: 2}
-  - {fileID: 11400000, guid: d69b658ebf20442429e3dea5e4b1db78, type: 2}
-  - {fileID: 11400000, guid: ab69e0623abcdca40b2b1ae41e2afd89, type: 2}
-  - {fileID: 11400000, guid: 9ff382abce3c5584cb291276a670602f, type: 2}
-  - {fileID: 11400000, guid: e4c49e7ce83bcd34987454dbd9740cba, type: 2}
+  - {fileID: 11400000, guid: 354bf39d3b653634f87461d1ea92d0e5, type: 2}
   landscapes: 000000000000000001000000
