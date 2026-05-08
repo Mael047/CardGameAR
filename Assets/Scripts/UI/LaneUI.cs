@@ -15,10 +15,12 @@ public class LaneUI : MonoBehaviour
     public int LaneIndex { get; private set; }
 
     private System.Action<int, int> onLaneSelected;
-    private bool isSetup = false;  // Bandera para saber si ya fue configurado
+    private bool isSetup = false;
 
+    // NUEVO parámetro buttonEnabled: true = jugador activo, false = oponente
     public void Setup(int playerIndex, int laneIndex,
-                      System.Action<int, int> onSelect)
+                      System.Action<int, int> onSelect,
+                      bool buttonEnabled = true)
     {
         PlayerIndex = playerIndex;
         LaneIndex = laneIndex;
@@ -28,12 +30,18 @@ public class LaneUI : MonoBehaviour
         if (buttonSelectLane != null)
         {
             buttonSelectLane.onClick.RemoveAllListeners();
-            buttonSelectLane.onClick.AddListener(
-                () => onLaneSelected(PlayerIndex, LaneIndex));
+
+            // Solo asigna el listener si el botón está habilitado
+            if (buttonEnabled)
+                buttonSelectLane.onClick.AddListener(
+                    () => onLaneSelected(PlayerIndex, LaneIndex));
+
+            // Habilita o deshabilita visualmente el botón
+            buttonSelectLane.gameObject.SetActive(buttonEnabled);
         }
         else
         {
-            Debug.LogError($"LaneUI [{name}]: buttonSelectLane no asignado en Inspector.");
+            Debug.LogError($"LaneUI [{name}]: buttonSelectLane no asignado.");
         }
 
         Refresh();
@@ -41,37 +49,29 @@ public class LaneUI : MonoBehaviour
 
     public void Refresh()
     {
-        // Si no está configurado o el GameManager no existe aún, no hace nada
         if (!isSetup || GameManager.Instance == null) return;
-
-        // Verifica que el índice sea válido antes de acceder al array
-        if (PlayerIndex >= GameManager.Instance.Players.Length)
-        {
-            Debug.LogError($"LaneUI: PlayerIndex {PlayerIndex} inválido.");
-            return;
-        }
+        if (PlayerIndex >= GameManager.Instance.Players.Length) return;
 
         PlayerState player = GameManager.Instance.Players[PlayerIndex];
         CardInstance creature = player.CreatureLanes[LaneIndex];
         CardInstance building = player.BuildingLanes[LaneIndex];
 
-        // Usa el operador ?. en cada texto por si no están asignados en el Inspector
         if (creature != null)
         {
             if (textCreatureName != null)
                 textCreatureName.text = creature.Data.cardName;
 
             if (textCreatureStats != null)
-                textCreatureStats.text = $"ATK:{creature.EffectiveAttack} " +
-                                         $"DEF:{creature.EffectiveDefense} " +
+                textCreatureStats.text = $"ATK:{creature.EffectiveAttack}  " +
+                                         $"DEF:{creature.EffectiveDefense}  " +
                                          $"DMG:{creature.AccumulatedDamage}";
 
             if (textCreatureState != null)
                 textCreatureState.text = creature.CurrentState switch
                 {
-                    CardState.Ready => "Ready",
-                    CardState.Flooped => "Flooped",
-                    CardState.Exhausted => "Exhausted",
+                    CardState.Ready => "✅ Ready",
+                    CardState.Flooped => "🌀 Floop",
+                    CardState.Exhausted => "😴 Exhausted",
                     _ => ""
                 };
 
@@ -93,7 +93,8 @@ public class LaneUI : MonoBehaviour
         }
 
         if (textBuildingName != null)
-            textBuildingName.text = building != null ? $"🏛 {building.Data.cardName}" : "";
+            textBuildingName.text = building != null
+                ? $"🏛 {building.Data.cardName}" : "";
     }
 
     private void OnDestroy()

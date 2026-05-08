@@ -2,52 +2,55 @@ using UnityEngine;
 
 public class FieldPanel : MonoBehaviour
 {
-    [SerializeField] private LaneUI[] lanesPlayer1;
-    [SerializeField] private LaneUI[] lanesPlayer2;
+    [SerializeField] private LaneUI[] lanesPlayer1 = new LaneUI[3];
+    [SerializeField] private LaneUI[] lanesPlayer2 = new LaneUI[3];
 
     private void OnEnable()
     {
         GameEvents.OnGameStateChanged += HandleGameReady;
+        GameEvents.OnTurnChanged += HandleTurnChanged;
     }
 
     private void OnDisable()
     {
         GameEvents.OnGameStateChanged -= HandleGameReady;
+        GameEvents.OnTurnChanged -= HandleTurnChanged;
     }
+
     private void HandleGameReady(GameState state)
     {
         GameEvents.OnGameStateChanged -= HandleGameReady;
         GameEvents.OnGameStateChanged += HandleStateChanged;
-
         SetupLanes();
     }
 
-    private void HandleStateChanged(GameState state)
-    {
-        Refresh();
-    }
+    private void HandleStateChanged(GameState state) => Refresh();
+
+    private void HandleTurnChanged(int activePlayerIndex) => SetupLanes();
 
     private void SetupLanes()
     {
-        // Verifica que los arrays estén asignados antes de iterar
         if (lanesPlayer1 == null || lanesPlayer2 == null)
         {
-            Debug.LogError("FieldPanel: faltan referencias a los LaneUI en el Inspector.");
+            Debug.LogError("FieldPanel: arrays de lanes no asignados.");
             return;
         }
 
-        for (int i = 0; i < 3; i++)
-        {
-            if (lanesPlayer1[i] != null)
-                lanesPlayer1[i].Setup(0, i, OnLaneSelected);
-            else
-                Debug.LogError($"FieldPanel: lanesPlayer1[{i}] no está asignado.");
+        int active = GameManager.Instance.ActivePlayerIndex;
+        int inactive = 1 - active;
 
-            if (lanesPlayer2[i] != null)
-                lanesPlayer2[i].Setup(1, i, OnLaneSelected);
-            else
-                Debug.LogError($"FieldPanel: lanesPlayer2[{i}] no está asignado.");
-        }
+        LaneUI[] activeLanes = active == 0 ? lanesPlayer1 : lanesPlayer2;
+        LaneUI[] inactiveLanes = active == 0 ? lanesPlayer2 : lanesPlayer1;
+
+        // Carriles del jugador activo: botón habilitado
+        for (int i = 0; i < 3; i++)
+            activeLanes[i]?.Setup(active, i, OnLaneSelected, buttonEnabled: true);
+
+        // Carriles del oponente: botón deshabilitado, solo muestra info
+        for (int i = 0; i < 3; i++)
+            inactiveLanes[i]?.Setup(inactive, i, OnLaneSelected, buttonEnabled: false);
+
+        Debug.Log($"FieldPanel: botones activos para Jugador {active + 1}");
     }
 
     public void Refresh()
@@ -59,7 +62,8 @@ public class FieldPanel : MonoBehaviour
     public void UpdateLane(int playerIndex, int laneIndex)
     {
         LaneUI[] lanes = playerIndex == 0 ? lanesPlayer1 : lanesPlayer2;
-        lanes[laneIndex]?.Refresh();
+        if (laneIndex >= 0 && laneIndex < lanes.Length)
+            lanes[laneIndex]?.Refresh();
     }
 
     private void OnLaneSelected(int playerIndex, int laneIndex)
