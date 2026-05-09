@@ -10,7 +10,7 @@ public enum  LandscapeType
     Nicelands,
     Cornfield,
     UselessSwamp,
-    BluePlains,
+    SpookyCemetery,
     Rainbow
 }
 

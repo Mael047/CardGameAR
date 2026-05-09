@@ -16,4 +16,11 @@ MonoBehaviour:
   deckPortrait: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   cards:
   - {fileID: 11400000, guid: 354bf39d3b653634f87461d1ea92d0e5, type: 2}
+  - {fileID: 11400000, guid: 784b6209c7f042a4cbcb5d99fe56cc25, type: 2}
+  - {fileID: 11400000, guid: a0be0afe048a5324caf707d4aa1c9ea1, type: 2}
+  - {fileID: 11400000, guid: 5a66502960661ee44b8a09e35e0e3e5a, type: 2}
+  - {fileID: 11400000, guid: 358582158c8263246b8674f711d005e6, type: 2}
+  - {fileID: 11400000, guid: af1d8324ecb96f244a5bc5559e34f39a, type: 2}
+  - {fileID: 11400000, guid: cdb973429f2e8e846929fe8f7de5b2a3, type: 2}
+  - {fileID: 11400000, guid: 1285b5eab40b96b45baa1471e926d497, type: 2}
   landscapes: 000000000000000001000000

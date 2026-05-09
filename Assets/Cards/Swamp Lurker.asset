@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae9c2949be209d445a650d2062ad435e, type: 3}
+  m_Name: Swamp Lurker
+  m_EditorClassIdentifier: Assembly-CSharp::CardData
+  cardName: Swamp Lurker
+  qrID: QR_006
+  cardArtwork: {fileID: 0}
+  cardType: 0
+  actionCost: 2
+  landscapeRequired: 2
+  landscapeAmount: 2
+  attack: 2
+  defense: 4
+  abilityType: 2
+  abilityActionCost: 1
+  abilityDescription: No puede ser objetivo de hechizos enmigos hasta tu proximo
+    turno.
+  creaturePrefab: {fileID: 171927380109893388, guid: 51fcf8f73c3ea1040bafb3459c87a616, type: 3}
+  floopAnimation: {fileID: 8500343167191344323, guid: 36a2903e866c7184a8349d9d266daa3d, type: 3}
+  spellEffect: {fileID: 0}
