@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ae9c2949be209d445a650d2062ad435e, type: 3}
-  m_Name: Candy Lab
+  m_Name: Spell
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: Candy Lab
-  qrID: QR_E01
+  cardName: Spell
+  qrID: QR_01
   cardArtwork: {fileID: 0}
-  cardType: 1
+  cardType: 2
   actionCost: 1
   landscapeRequired: 0
-  landscapeAmount: 1
-  attack: 0
+  landscapeAmount: 0
+  attack: 3
   defense: 0
-  abilityType: 1
+  abilityType: 0
   abilityActionCost: 0
-  abilityDescription: Al inicio de tu turno, si el carril opuesto no tiene una criatura
-    enemiga en Ready, roba 1 carta.
-  creaturePrefab: {fileID: 171927380109893388, guid: ab736ef160baf54478607c7efed9b612, type: 3}
+  abilityDescription: 
+  creaturePrefab: {fileID: 0}
+  buildingPrefab: {fileID: 0}
   floopAnimation: {fileID: 0}
   spellEffect: {fileID: 0}

@@ -8,7 +8,6 @@ public class UIManager : MonoBehaviour
 
     [Header("Paneles Principales")]
     [SerializeField] private GameInfoPanel gameInfoPanel;
-    [SerializeField] private HandPanel handPanel;
     [SerializeField] private FieldPanel fieldPanel;
     [SerializeField] private ActionsPanel actionsPanel;
     [SerializeField] private GameOverPanel gameOverPanel;
@@ -47,18 +46,14 @@ public class UIManager : MonoBehaviour
         gameOverPanel.gameObject.SetActive(newState == GameState.GameOver);
         gameInfoPanel.UpdateState(newState);
 
-        // BUG CORREGIDO: la mano y el campo también deben refrescarse
-        // cuando el estado cambia (ej: al inicio del turno después de robar)
         if (newState == GameState.Actions)
         {
-            handPanel.Refresh();
             fieldPanel.Refresh();
             actionsPanel.UpdateActionCount(
                 GameManager.Instance.ActivePlayer.ActionsRemaining);
         }
 
         bool isPlaying = newState != GameState.Setup;
-        handPanel.gameObject.SetActive(isPlaying);
         fieldPanel.gameObject.SetActive(isPlaying);
         actionsPanel.gameObject.SetActive(isPlaying);
         gameInfoPanel.gameObject.SetActive(isPlaying);
@@ -72,21 +67,14 @@ public class UIManager : MonoBehaviour
     private void HandleTurnChanged(int activePlayerIndex)
     {
         gameInfoPanel.UpdateTurn(activePlayerIndex);
-        handPanel.Refresh();
         fieldPanel.Refresh();
     }
 
-    private void HandleCardDrawn(int playerIndex, CardInstance card)
-    {
-        // Solo refresca si es el jugador activo
-        if (playerIndex == GameManager.Instance.ActivePlayerIndex)
-            handPanel.Refresh();
-    }
+    private void HandleCardDrawn(int playerIndex, CardInstance card) { }
 
     private void HandleCardPlayed(int playerIndex, int laneIndex, CardInstance card)
     {
         fieldPanel.UpdateLane(playerIndex, laneIndex);
-        handPanel.Refresh();
         actionsPanel.UpdateActionCount(
             GameManager.Instance.ActivePlayer.ActionsRemaining);
     }

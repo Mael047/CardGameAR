@@ -52,9 +52,7 @@ public class ARPlacementManager : MonoBehaviour
                 break;
 
             case CardType.Spell:
-                // Los hechizos normalmente no necesitan carril, pero si tu juego lo permite,
-                // puedes pasarlo aquí o llamar a TryPlaySpell(cardInHand)
-                success = GameManager.Instance.TryPlaySpell(cardInHand);
+                success = GameManager.Instance.TryPlaySpell(cardInHand, waitingLaneIndex);
                 break;
 
             default:

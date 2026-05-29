@@ -29,6 +29,7 @@ public class CardData : ScriptableObject
 
     [Header("AR")]
     public GameObject creaturePrefab;
+    public GameObject buildingPrefab;
     public AnimationClip floopAnimation;
     public ParticleSystem spellEffect;
 }

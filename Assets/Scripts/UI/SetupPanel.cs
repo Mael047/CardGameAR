@@ -3,9 +3,13 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 
-// Este panel maneja la fase de configuración donde cada jugador
-// elige qué paisaje va en cada uno de sus 3 carriles.
-// Se muestra antes de que empiece el juego y se oculta al terminar.
+[System.Serializable]
+public struct LandscapeSpriteEntry
+{
+    public LandscapeType type;
+    public Sprite sprite;
+}
+
 public class SetupPanel : MonoBehaviour
 {
     public static SetupPanel Instance { get; private set; }
@@ -15,15 +19,35 @@ public class SetupPanel : MonoBehaviour
     [SerializeField] private TMP_Text textCurrentPlayer;
     [SerializeField] private Button buttonConfirmSetup;
 
-    [Header("Botones de carriles (3 por jugador)")]
-    // Cada botón representa un carril — al presionarlo se asigna el paisaje seleccionado
-    [SerializeField] private Button[] laneButtons;        // 3 botones
-    [SerializeField] private TMP_Text[] laneTexts;          // texto de cada carril
+    [Header("Carriles — UI visual")]
+    [SerializeField] private Button[] laneButtons;
+    [SerializeField] private TMP_Text[] laneTexts;
+    [SerializeField] private Image[] laneBackgrounds;
+
+    [Header("Sprites de paisajes")]
+    [SerializeField] private LandscapeSpriteEntry[] landscapeSprites;
 
     [Header("Botones de paisajes disponibles")]
-    // Se generan dinámicamente según el mazo del jugador activo
     [SerializeField] private Transform landscapeButtonContainer;
     [SerializeField] private Button landscapeButtonPrefab;
+
+    private static Dictionary<LandscapeType, Sprite> spriteMap;
+
+    public static Sprite GetLandscapeSprite(LandscapeType landscape)
+    {
+        if (spriteMap != null && spriteMap.TryGetValue(landscape, out Sprite s))
+            return s;
+        return null;
+    }
+
+    private void BuildSpriteMap()
+    {
+        spriteMap = new Dictionary<LandscapeType, Sprite>();
+        if (landscapeSprites == null) return;
+        foreach (var entry in landscapeSprites)
+            if (!spriteMap.ContainsKey(entry.type))
+                spriteMap[entry.type] = entry.sprite;
+    }
 
     // ── Estado interno ────────────────────────────────────────────────────
     // El jugador que está configurando actualmente (0 o 1)
@@ -47,6 +71,7 @@ public class SetupPanel : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+        BuildSpriteMap();
     }
 
     private void Start()
@@ -54,15 +79,20 @@ public class SetupPanel : MonoBehaviour
         buttonConfirmSetup.onClick.AddListener(OnConfirmPressed);
         buttonConfirmSetup.interactable = false;
 
-        // Configura los botones de carril
         for (int i = 0; i < laneButtons.Length; i++)
         {
-            int capturedIndex = i; // Captura para la lambda
+            int capturedIndex = i;
             laneButtons[i].onClick.AddListener(() => OnLaneButtonPressed(capturedIndex));
         }
 
-        // Suscribe al evento de estado para saber cuándo mostrar/ocultar
         GameEvents.OnGameStateChanged += HandleStateChanged;
+
+        // Si GameManager ya está en Setup (ejecutó su Start antes que nosotros)
+        if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.Setup)
+        {
+            gameObject.SetActive(true);
+            StartSetupForPlayer(0);
+        }
     }
 
     private void OnDestroy()
@@ -108,51 +138,69 @@ public class SetupPanel : MonoBehaviour
         RefreshLandscapeButtons();
     }
 
-    // ── Refresca los botones de carriles ──────────────────────────────────
     private void RefreshLaneButtons()
     {
         for (int i = 0; i < 3; i++)
         {
             if (assignedLandscapes[i].HasValue)
             {
-                // Carril ya asignado — muestra el paisaje y deshabilita
-                laneTexts[i].text = assignedLandscapes[i].Value.ToString();
+                LandscapeType landscape = assignedLandscapes[i].Value;
+                laneTexts[i].text = landscape.ToString();
                 laneButtons[i].interactable = false;
+                if (laneBackgrounds != null && i < laneBackgrounds.Length && laneBackgrounds[i] != null)
+                {
+                    laneBackgrounds[i].sprite = GetLandscapeSprite(landscape);
+                    laneBackgrounds[i].color = Color.white;
+                }
             }
             else
             {
-                // Carril vacío — habilitado si hay un paisaje seleccionado
                 laneTexts[i].text = "— vacío —";
                 laneButtons[i].interactable = selectedLandscape.HasValue;
+                if (laneBackgrounds != null && i < laneBackgrounds.Length && laneBackgrounds[i] != null)
+                {
+                    laneBackgrounds[i].sprite = null;
+                    laneBackgrounds[i].color = Color.clear;
+                }
             }
         }
     }
 
-    // ── Refresca los botones de paisajes disponibles ──────────────────────
     private void RefreshLandscapeButtons()
     {
-        // Destruye los botones anteriores
         foreach (Button b in spawnedLandscapeButtons)
             if (b != null) Destroy(b.gameObject);
         spawnedLandscapeButtons.Clear();
 
-        // Crea un botón por cada tipo de paisaje disponible
+        if (landscapeButtonPrefab == null)
+        {
+            Debug.LogError("SetupPanel: landscapeButtonPrefab no asignado en el Inspector.");
+            return;
+        }
+        if (landscapeButtonContainer == null)
+        {
+            Debug.LogError("SetupPanel: landscapeButtonContainer no asignado en el Inspector.");
+            return;
+        }
+
         foreach (var kvp in availableLandscapes)
         {
-            if (kvp.Value <= 0) continue; // Ya usó todos los de este tipo
-
-            Button newBtn = Instantiate(landscapeButtonPrefab, landscapeButtonContainer);
-            TMP_Text btnText = newBtn.GetComponentInChildren<TMP_Text>();
+            if (kvp.Value <= 0) continue;
 
             LandscapeType capturedType = kvp.Key;
             int count = kvp.Value;
 
+            Button newBtn = Instantiate(landscapeButtonPrefab, landscapeButtonContainer);
+            TMP_Text btnText = newBtn.GetComponentInChildren<TMP_Text>();
             if (btnText != null)
                 btnText.text = $"{capturedType} (x{count})";
+            else
+                Debug.LogWarning($"SetupPanel: el prefab no tiene TMP_Text child para {capturedType}");
 
             newBtn.onClick.AddListener(() => OnLandscapeSelected(capturedType));
             spawnedLandscapeButtons.Add(newBtn);
         }
+
     }
 
     // ── El jugador selecciona un tipo de paisaje ──────────────────────────

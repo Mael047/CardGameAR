@@ -10,20 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ae9c2949be209d445a650d2062ad435e, type: 3}
-  m_Name: Tiny Crypt
+  m_Name: Candy Lab
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: Tiny Crypt
+  cardName: Candy Lab
   qrID: QR_E02
   cardArtwork: {fileID: 0}
   cardType: 1
   actionCost: 1
-  landscapeRequired: 3
-  landscapeAmount: 0
+  landscapeRequired: 0
+  landscapeAmount: 1
   attack: 0
   defense: 0
   abilityType: 1
   abilityActionCost: 0
-  abilityDescription: La criatura en este carril gana +1 DEF.
-  creaturePrefab: {fileID: 171927380109893388, guid: ee0e7e8da41cd654d8d04e03cfdd743f, type: 3}
+  abilityDescription: Al inicio de tu turno, si el carril opuesto no tiene una criatura
+    enemiga en Ready, roba 1 carta.
+  creaturePrefab: {fileID: 171927380109893388, guid: ab736ef160baf54478607c7efed9b612, type: 3}
+  buildingPrefab: {fileID: 171927380109893388, guid: ab736ef160baf54478607c7efed9b612, type: 3}
   floopAnimation: {fileID: 0}
   spellEffect: {fileID: 0}

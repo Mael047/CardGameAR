@@ -17,7 +17,6 @@ public class LaneUI : MonoBehaviour
     private System.Action<int, int> onLaneSelected;
     private bool isSetup = false;
 
-    // NUEVO parámetro buttonEnabled: true = jugador activo, false = oponente
     public void Setup(int playerIndex, int laneIndex,
                       System.Action<int, int> onSelect,
                       bool buttonEnabled = true)
@@ -31,12 +30,10 @@ public class LaneUI : MonoBehaviour
         {
             buttonSelectLane.onClick.RemoveAllListeners();
 
-            // Solo asigna el listener si el botón está habilitado
             if (buttonEnabled)
                 buttonSelectLane.onClick.AddListener(
                     () => onLaneSelected(PlayerIndex, LaneIndex));
 
-            // Habilita o deshabilita visualmente el botón
             buttonSelectLane.gameObject.SetActive(buttonEnabled);
         }
         else
@@ -44,7 +41,16 @@ public class LaneUI : MonoBehaviour
             Debug.LogError($"LaneUI [{name}]: buttonSelectLane no asignado.");
         }
 
+        SetTextActive(true);
         Refresh();
+    }
+
+    private void SetTextActive(bool active)
+    {
+        if (textCreatureName != null) textCreatureName.gameObject.SetActive(active);
+        if (textCreatureStats != null) textCreatureStats.gameObject.SetActive(active);
+        if (textCreatureState != null) textCreatureState.gameObject.SetActive(active);
+        if (textBuildingName != null) textBuildingName.gameObject.SetActive(active);
     }
 
     public void Refresh()
@@ -55,6 +61,25 @@ public class LaneUI : MonoBehaviour
         PlayerState player = GameManager.Instance.Players[PlayerIndex];
         CardInstance creature = player.CreatureLanes[LaneIndex];
         CardInstance building = player.BuildingLanes[LaneIndex];
+
+        // Fondo: sprite del paisaje del carril
+        if (laneBackground != null)
+        {
+            Sprite landscapeSprite = player.Landscapes != null && LaneIndex < player.Landscapes.Length
+                ? SetupPanel.GetLandscapeSprite(player.Landscapes[LaneIndex])
+                : null;
+
+            if (landscapeSprite != null)
+            {
+                laneBackground.sprite = landscapeSprite;
+                laneBackground.color = Color.white;
+            }
+            else
+            {
+                laneBackground.sprite = null;
+                laneBackground.color = Color.clear;
+            }
+        }
 
         if (creature != null)
         {
@@ -69,32 +94,22 @@ public class LaneUI : MonoBehaviour
             if (textCreatureState != null)
                 textCreatureState.text = creature.CurrentState switch
                 {
-                    CardState.Ready => "✅ Ready",
-                    CardState.Flooped => "🌀 Floop",
-                    CardState.Exhausted => "😴 Exhausted",
+                    CardState.Ready => "Ready",
+                    CardState.Flooped => "Floop",
+                    CardState.Exhausted => "Exhausted",
                     _ => ""
-                };
-
-            if (laneBackground != null)
-                laneBackground.color = creature.CurrentState switch
-                {
-                    CardState.Ready => new Color(0.2f, 0.8f, 0.2f, 0.3f),
-                    CardState.Flooped => new Color(0.5f, 0.2f, 0.8f, 0.3f),
-                    CardState.Exhausted => new Color(0.5f, 0.5f, 0.5f, 0.3f),
-                    _ => Color.clear
                 };
         }
         else
         {
-            if (textCreatureName != null) textCreatureName.text = "— vacío —";
+            if (textCreatureName != null) textCreatureName.text = " vacío ";
             if (textCreatureStats != null) textCreatureStats.text = "";
             if (textCreatureState != null) textCreatureState.text = "";
-            if (laneBackground != null) laneBackground.color = Color.clear;
         }
 
         if (textBuildingName != null)
             textBuildingName.text = building != null
-                ? $"🏛 {building.Data.cardName}" : "";
+                ? $"{building.Data.cardName}" : "";
     }
 
     private void OnDestroy()

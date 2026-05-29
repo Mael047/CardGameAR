@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Serialization;
 using TMPro;
 
 public class ActionsPanel : MonoBehaviour
@@ -8,33 +9,23 @@ public class ActionsPanel : MonoBehaviour
 
     [Header("Botones Principales")]
     [SerializeField] private Button buttonFight;
-    [SerializeField] private Button buttonDrawSwap;
+    [FormerlySerializedAs("buttonDrawSwap")]
+    [SerializeField] private Button buttonFloopMain;
     [SerializeField] private TMP_Text textActionCount;
 
     [Header("Panel — Carta en MANO")]
     [SerializeField] private GameObject panelCardOptions;
     [SerializeField] private TMP_Text textSelectedCard;
-    [SerializeField] private Button buttonPlaySpell;  // nuevo: lanzar hechizo
+    [SerializeField] private Button buttonPlaySpell;
     [SerializeField] private Button buttonCancel;
-
-    [Header("Panel — Carta en CAMPO")]
-    // Panel separado para cuando el jugador selecciona una criatura ya colocada
-    [SerializeField] private GameObject panelFieldCardOptions;
-    [SerializeField] private TMP_Text textFieldCard;
-    [SerializeField] private Button buttonFloop;
-    [SerializeField] private Button buttonFieldCancel;
 
     [Header("Instrucciones")]
     [SerializeField] private TMP_Text textInstruction;
 
-    [Header("Referencias")]
-    [SerializeField] private HandPanel handPanel;
-
     // ── Estado interno ────────────────────────────────────────────────────
-    private CardInstance pendingCard;        // carta de la mano esperando carril
-    private CardInstance selectedFieldCard;  // criatura en el campo seleccionada
-    private int selectedFieldLane = -1;
+    private CardInstance pendingCard;
     private bool expectingLaneSelection;
+    private int floopTargetLane = -1;
 
     private void Awake()
     {
@@ -45,21 +36,24 @@ public class ActionsPanel : MonoBehaviour
     private void Start()
     {
         buttonFight.onClick.AddListener(OnFightPressed);
-        buttonDrawSwap.onClick.AddListener(OnDrawSwapPressed);
+        buttonFloopMain.onClick.AddListener(OnFloopMainPressed);
         buttonPlaySpell.onClick.AddListener(OnPlaySpellPressed);
         buttonCancel.onClick.AddListener(OnCancelPressed);
-        buttonFloop.onClick.AddListener(OnFloopPressed);
-        buttonFieldCancel.onClick.AddListener(OnFieldCancelPressed);
 
         panelCardOptions.SetActive(false);
-        panelFieldCardOptions.SetActive(false);
+
+        TMP_Text btnText = buttonFloopMain.GetComponentInChildren<TMP_Text>();
+        if (btnText != null) btnText.text = "Floop";
+
         SetInstruction("Selecciona una carta de tu mano o una criatura del campo.");
     }
 
     // ── Carta de la MANO seleccionada ─────────────────────────────────────
     public void ShowCardOptions(CardInstance card)
     {
-        HideFieldCardOptions();
+        floopTargetLane = -1;
+        buttonFloopMain.interactable = false;
+
         pendingCard = card;
         panelCardOptions.SetActive(true);
 
@@ -71,7 +65,7 @@ public class ActionsPanel : MonoBehaviour
         buttonPlaySpell.gameObject.SetActive(isSpell);
 
         if (isSpell)
-            SetInstruction($"Presiona 'Lanzar' para usar {card.Data.cardName}.");
+            SetInstruction($"Selecciona un carril y escanea la carta para lanzar {card.Data.cardName}.");
         else
             SetInstruction($"Selecciona un carril para colocar {card.Data.cardName}.");
 
@@ -86,85 +80,60 @@ public class ActionsPanel : MonoBehaviour
         SetInstruction("Selecciona una carta de tu mano o una criatura del campo.");
     }
 
-    // ── Criatura del CAMPO seleccionada ───────────────────────────────────
-    public void ShowFieldCardOptions(CardInstance card, int laneIndex)
-    {
-        if (GameManager.Instance.CurrentState != GameState.Actions) return;
-
-        HideCardOptions();
-        handPanel?.Deselect();
-
-        selectedFieldCard = card;
-        selectedFieldLane = laneIndex;
-        panelFieldCardOptions.SetActive(true);
-
-        textFieldCard.text = $"{card.Data.cardName}\n" +
-                             $"ATK:{card.EffectiveAttack}  DEF:{card.EffectiveDefense}  " +
-                             $"Daño:{card.AccumulatedDamage}\n" +
-                             $"Estado: {card.CurrentState}";
-
-        bool canFloop = card.CanFloop &&
-                        GameManager.Instance.ActivePlayer
-                                   .CanAfford(card.Data.abilityActionCost);
-        buttonFloop.interactable = canFloop;
-
-        if (!card.Data.abilityType.Equals(AbilityType.Floop))
-            SetInstruction($"{card.Data.cardName} no tiene habilidad Floop.");
-        else if (canFloop)
-            SetInstruction($"Floop disponible (costo: {card.Data.abilityActionCost}). " +
-                           $"La criatura entrará en modo defensa.");
-        else
-            SetInstruction($"No puedes Flopear ahora " +
-                           $"(acciones: {GameManager.Instance.ActivePlayer.ActionsRemaining}).");
-    }
-
-    public void HideFieldCardOptions()
-    {
-        selectedFieldCard = null;
-        selectedFieldLane = -1;
-        panelFieldCardOptions.SetActive(false);
-    }
-
     // ── Carril presionado en el campo ─────────────────────────────────────
     public void OnLaneSelected(int playerIndex, int laneIndex)
     {
-        // Solo si es nuestro turno y nuestro carril
-        if (playerIndex == GameManager.Instance.ActivePlayerIndex)
-        {
-            // Le decimos al Manager de AR que el siguiente QR que vea va a este carril
+        PlayerState activePlayer = GameManager.Instance.ActivePlayer;
+        int activeIdx = GameManager.Instance.ActivePlayerIndex;
+
+        // Siempre prepara el carril para AR
+        if (playerIndex == activeIdx)
             ARPlacementManager.Instance.SetWaitingLane(laneIndex);
 
-            // Opcional: Mostrar un mensaje en pantalla para el usuario
-            SetInstruction($"Escanea tu carta para el Carril {laneIndex + 1}");
+        // Si esperamos selección de carril para colocar carta
+        if (expectingLaneSelection && pendingCard != null)
+        {
+            bool success = false;
+
+            if (pendingCard.Data.cardType == CardType.Creature)
+                success = GameManager.Instance.TryPlayCreature(pendingCard, laneIndex);
+            else if (pendingCard.Data.cardType == CardType.Building)
+                success = GameManager.Instance.TryPlayBuilding(pendingCard, laneIndex);
+
+            if (success)
+            {
+                HideCardOptions();
+                UpdateActionCount(activePlayer.ActionsRemaining);
+                SetInstruction("Carta jugada.");
+            }
+            return;
         }
 
-        if (!expectingLaneSelection || pendingCard == null) return;
+        // Si hay una carta pendiente (spell), no revisar Floop
+        if (pendingCard != null) return;
 
-        bool success = false;
-
-        if (pendingCard.Data.cardType == CardType.Creature)
+        // Si no estamos colocando carta, verificar si hay criatura Flopeable
+        if (playerIndex == activeIdx)
         {
-            success = GameManager.Instance.TryPlayCreature(pendingCard, laneIndex);
-        }
-        else if (pendingCard.Data.cardType == CardType.Building)
-        {
-            success = GameManager.Instance.TryPlayBuilding(pendingCard, laneIndex);
-        }
-        // ------------------------------------
-
-        if (success)
-        {
-            HideCardOptions();
-            UpdateActionCount(GameManager.Instance.ActivePlayer.ActionsRemaining);
-            SetInstruction("Carta jugada.");
-        }
-        else
-        {
-            // ... (tus mensajes de error)
+            CardInstance creature = activePlayer.CreatureLanes[laneIndex];
+            if (creature != null && creature.CanFloop &&
+                activePlayer.CanAfford(creature.Data.abilityActionCost))
+            {
+                floopTargetLane = laneIndex;
+                buttonFloopMain.interactable = true;
+                SetInstruction($"Floop disponible en Carril {laneIndex + 1} " +
+                               $"(costo: {creature.Data.abilityActionCost}).");
+            }
+            else
+            {
+                floopTargetLane = -1;
+                buttonFloopMain.interactable = false;
+                SetInstruction($"Escanea tu carta para el Carril {laneIndex + 1}");
+            }
         }
     }
 
-    // ── Handlers ─────────────────────────────────────────────────────────
+    // ── Handlers ──────────────────────────────────────────────────────────
 
     private void OnPlaySpellPressed()
     {
@@ -188,19 +157,15 @@ public class ActionsPanel : MonoBehaviour
         }
     }
 
-    private void OnFloopPressed()
+    private void OnFloopMainPressed()
     {
-        if (selectedFieldCard == null || selectedFieldLane < 0) return;
+        if (floopTargetLane < 0) return;
 
-        bool success = GameManager.Instance.TryFloop(selectedFieldLane);
+        bool success = GameManager.Instance.TryFloop(floopTargetLane);
         if (success)
         {
-            // Refresca el texto del panel con el nuevo estado
-            textFieldCard.text = $"{selectedFieldCard.Data.cardName}\n" +
-                                 $"ATK:{selectedFieldCard.EffectiveAttack}  " +
-                                 $"DEF:{selectedFieldCard.EffectiveDefense}\n" +
-                                 $"Estado: {selectedFieldCard.CurrentState}";
-            buttonFloop.interactable = false;
+            buttonFloopMain.interactable = false;
+            floopTargetLane = -1;
             UpdateActionCount(GameManager.Instance.ActivePlayer.ActionsRemaining);
             SetInstruction("¡Floop activado! La criatura está en modo defensa.");
         }
@@ -214,42 +179,23 @@ public class ActionsPanel : MonoBehaviour
     {
         GameManager.Instance.ProceedToFight();
         HideCardOptions();
-        HideFieldCardOptions();
-    }
-
-    private void OnDrawSwapPressed()
-    {
-        PlayerState player = GameManager.Instance.ActivePlayer;
-        if (!player.CanAfford(1))
-        {
-            SetInstruction("No tienes acciones para cambiar carta.");
-            return;
-        }
-        player.SpendActions(1);
-        CardInstance drawn = player.DrawCard();
-        if (drawn != null)
-            GameEvents.OnCardDrawn?.Invoke(GameManager.Instance.ActivePlayerIndex, drawn);
-        UpdateActionCount(player.ActionsRemaining);
-        SetInstruction("Carta cambiada.");
     }
 
     private void OnCancelPressed()
     {
         HideCardOptions();
-        handPanel?.Deselect();
-    }
-
-    private void OnFieldCancelPressed()
-    {
-        HideFieldCardOptions();
     }
 
     // ── Utilidades ────────────────────────────────────────────────────────
     public void SetInteractable(bool interactable)
     {
         buttonFight.interactable = interactable;
-        buttonDrawSwap.interactable = interactable;
-        if (!interactable) { HideCardOptions(); HideFieldCardOptions(); }
+        if (!interactable)
+        {
+            buttonFloopMain.interactable = false;
+            floopTargetLane = -1;
+            HideCardOptions();
+        }
     }
 
     public void UpdateActionCount(int actions)
@@ -267,10 +213,8 @@ public class ActionsPanel : MonoBehaviour
     private void OnDestroy()
     {
         buttonFight.onClick.RemoveAllListeners();
-        buttonDrawSwap.onClick.RemoveAllListeners();
+        buttonFloopMain.onClick.RemoveAllListeners();
         buttonPlaySpell.onClick.RemoveAllListeners();
         buttonCancel.onClick.RemoveAllListeners();
-        buttonFloop.onClick.RemoveAllListeners();
-        buttonFieldCancel.onClick.RemoveAllListeners();
     }
 }

@@ -23,4 +23,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: af1d8324ecb96f244a5bc5559e34f39a, type: 2}
   - {fileID: 11400000, guid: cdb973429f2e8e846929fe8f7de5b2a3, type: 2}
   - {fileID: 11400000, guid: 1285b5eab40b96b45baa1471e926d497, type: 2}
+  - {fileID: 11400000, guid: a0be0afe048a5324caf707d4aa1c9ea1, type: 2}
+  - {fileID: 11400000, guid: cf8d1cb8915c02a49ade4e25e36ab26a, type: 2}
   landscapes: 000000000000000001000000

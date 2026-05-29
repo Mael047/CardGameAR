@@ -43,7 +43,14 @@ public class PlayerState
         BuildDeck();
     }
 
-    // Nuevo: llamado por SetupPanel cuando el jugador confirma sus paisajes
+    // Todas las cartas del mazo están disponibles desde el inicio
+    public void MoveAllToHand()
+    {
+        while (Deck.Count > 0)
+            Hand.Add(Deck.Pop());
+        Debug.Log($"{PlayerName}: {Hand.Count} cartas disponibles.");
+    }
+
     public void SetLandscape(int laneIndex, LandscapeType landscape)
     {
         Landscapes[laneIndex] = landscape;
@@ -52,20 +59,11 @@ public class PlayerState
 
     private void BuildDeck()
     {
-        List<CardInstance> tempList = new List<CardInstance>();
         foreach (CardData cardData in DeckData.cards)
-            tempList.Add(new CardInstance(cardData));
-
-        for (int i = tempList.Count - 1; i > 0; i--)
         {
-            int j = Random.Range(0, i + 1);
-            CardInstance t = tempList[i];
-            tempList[i] = tempList[j];
-            tempList[j] = t;
-        }
-
-        foreach (CardInstance card in tempList)
+            CardInstance card = new CardInstance(cardData);
             Deck.Push(card);
+        }
 
         Debug.Log($"{PlayerName}: mazo construido con {Deck.Count} cartas.");
     }

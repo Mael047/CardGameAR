@@ -22,8 +22,9 @@ MonoBehaviour:
   attack: 1
   defense: 5
   abilityType: 2
-  abilityActionCost: 0
+  abilityActionCost: 1
   abilityDescription: "Reduce todo el da\xF1o recibido en 1.\t"
   creaturePrefab: {fileID: 171927380109893388, guid: 543b623ed1008c049a5563748ef3b010, type: 3}
+  buildingPrefab: {fileID: 0}
   floopAnimation: {fileID: 7400000, guid: 54948340193221b4aa8e859e77a0d367, type: 3}
   spellEffect: {fileID: 0}

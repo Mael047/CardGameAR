@@ -44,8 +44,9 @@ public class GameManager : MonoBehaviour
         ActivePlayerIndex = Random.Range(0, 2);
         Debug.Log($"Empieza: Jugador {ActivePlayerIndex + 1}");
 
-        Players[0].DrawInitialHand();
-        Players[1].DrawInitialHand();
+        // Todas las cartas del mazo están disponibles desde el inicio
+        Players[0].MoveAllToHand();
+        Players[1].MoveAllToHand();
 
         // Primero va la fase de Setup para colocar paisajes
         ChangeState(GameState.Setup);
@@ -74,16 +75,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // ── TurnStart ─────────────────────────────────────────────────────────
     private void HandleTurnStart()
     {
         ReadyAllCards();
         EvaluateContinuousPassives();
-
-        CardInstance drawn = ActivePlayer.DrawCard();
-        if (drawn != null)
-            GameEvents.OnCardDrawn?.Invoke(ActivePlayerIndex, drawn);
-
         ActivePlayer.RestoreActions();
         StartCoroutine(TransitionAfterDelay(GameState.Actions, 0.5f));
     }
@@ -144,7 +139,7 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
-    public bool TryPlaySpell(CardInstance card)
+    public bool TryPlaySpell(CardInstance card, int laneIndex = -1)
     {
         if (CurrentState != GameState.Actions) return false;
         if (!ActivePlayer.Hand.Contains(card)) return false;
@@ -157,11 +152,11 @@ public class GameManager : MonoBehaviour
         if (!isFree && !ActivePlayer.CanAfford(card.Data.actionCost)) return false;
         if (!isFree) ActivePlayer.SpendActions(card.Data.actionCost);
 
-        ResolveSpellEffect(card);
+        ResolveSpellEffect(card, laneIndex);
         ActivePlayer.DiscardSpell(card);
 
         // Notifica la UI para refrescar la mano
-        GameEvents.OnCardPlayed?.Invoke(ActivePlayerIndex, -1, card);
+        GameEvents.OnCardPlayed?.Invoke(ActivePlayerIndex, laneIndex, card);
         return true;
     }
 
@@ -286,53 +281,36 @@ public class GameManager : MonoBehaviour
         int opp = 1 - ActivePlayerIndex;
         switch (card.Data.cardName)
         {
-            case "Fórmula Bot":
-                if (OpponentPlayer.Hand.Count > 0)
-                {
-                    int idx = Random.Range(0, OpponentPlayer.Hand.Count);
-                    CardInstance d = OpponentPlayer.Hand[idx];
-                    OpponentPlayer.Hand.RemoveAt(idx);
-                    OpponentPlayer.Discard.Add(d);
-                }
-                break;
-            case "Skeletal Hand":
-                for (int i = 0; i < 2 && OpponentPlayer.HasCards; i++)
-                    OpponentPlayer.Discard.Add(OpponentPlayer.Deck.Pop());
-                break;
-            case "Plains Runner":
-                for (int i = 0; i < 3; i++)
-                    if (ActivePlayer.CreatureLanes[i] == null && i != laneIndex)
-                    {
-                        ActivePlayer.CreatureLanes[laneIndex] = null;
-                        ActivePlayer.CreatureLanes[i] = card;
-                        card.PlaceInLane(i);
-                        break;
-                    }
+            
+            case "Sugar Golem":
+                card.AddDefenseBonus(1); ;
                 break;
         }
     }
 
-    private void ResolveSpellEffect(CardInstance spell)
+    private void ResolveSpellEffect(CardInstance spell, int laneIndex = -1)
     {
         int opp = 1 - ActivePlayerIndex;
         switch (spell.Data.cardName)
         {
-            case "Science Blast":
-                for (int i = 0; i < 3; i++)
+            case "Spell":
+                if (laneIndex >= 0)
                 {
-                    CardInstance t = OpponentPlayer.CreatureLanes[i];
-                    if (t != null)
+                    CardInstance target = OpponentPlayer.CreatureLanes[laneIndex];
+                    if (target != null)
                     {
-                        if (t.TakeDamage(2)) { OpponentPlayer.DestroyCreature(i); GameEvents.OnCardDestroyed?.Invoke(opp, i); }
-                        break;
+                        if (target.TakeDamage(3))
+                        {
+                            OpponentPlayer.DestroyCreature(laneIndex);
+                            GameEvents.OnCardDestroyed?.Invoke(opp, laneIndex);
+                        }
                     }
-                }
-                break;
-            case "Oh My Glob!":
-                for (int i = 0; i < 3; i++)
-                {
-                    CardInstance t = OpponentPlayer.CreatureLanes[i];
-                    if (t != null && t.CurrentState == CardState.Flooped) { t.ReadyUp(); break; }
+                    else
+                    {
+                        OpponentPlayer.TakeDamage(3);
+                        GameEvents.OnDirectDamage?.Invoke(opp, 3);
+                        GameEvents.OnHPChanged?.Invoke(opp, OpponentPlayer.CurrentHP);
+                    }
                 }
                 break;
         }

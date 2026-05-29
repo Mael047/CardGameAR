@@ -5,16 +5,29 @@ public class FieldPanel : MonoBehaviour
     [SerializeField] private LaneUI[] lanesPlayer1 = new LaneUI[3];
     [SerializeField] private LaneUI[] lanesPlayer2 = new LaneUI[3];
 
+    private System.Action<int, int, CardInstance> onCardPlayed;
+    private System.Action<int, int> onCardDestroyed;
+
+    private void Awake()
+    {
+        onCardPlayed = (p, l, c) => Refresh();
+        onCardDestroyed = (p, l) => Refresh();
+    }
+
     private void OnEnable()
     {
         GameEvents.OnGameStateChanged += HandleGameReady;
         GameEvents.OnTurnChanged += HandleTurnChanged;
+        GameEvents.OnCardPlayed += onCardPlayed;
+        GameEvents.OnCardDestroyed += onCardDestroyed;
     }
 
     private void OnDisable()
     {
         GameEvents.OnGameStateChanged -= HandleGameReady;
         GameEvents.OnTurnChanged -= HandleTurnChanged;
+        GameEvents.OnCardPlayed -= onCardPlayed;
+        GameEvents.OnCardDestroyed -= onCardDestroyed;
     }
 
     private void HandleGameReady(GameState state)
