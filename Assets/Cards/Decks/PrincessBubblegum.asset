@@ -10,19 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0d18cba09d9a77c4e96b54abff07abc5, type: 3}
-  m_Name: PrincesBubblegum
+  m_Name: PrincessBubblegum
   m_EditorClassIdentifier: Assembly-CSharp::DeckData
   deckName: Princess Bubblegum
-  deckPortrait: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  deckPortrait: {fileID: 0}
   cards:
   - {fileID: 11400000, guid: 354bf39d3b653634f87461d1ea92d0e5, type: 2}
-  - {fileID: 11400000, guid: 784b6209c7f042a4cbcb5d99fe56cc25, type: 2}
   - {fileID: 11400000, guid: a0be0afe048a5324caf707d4aa1c9ea1, type: 2}
-  - {fileID: 11400000, guid: 5a66502960661ee44b8a09e35e0e3e5a, type: 2}
   - {fileID: 11400000, guid: 358582158c8263246b8674f711d005e6, type: 2}
-  - {fileID: 11400000, guid: af1d8324ecb96f244a5bc5559e34f39a, type: 2}
-  - {fileID: 11400000, guid: cdb973429f2e8e846929fe8f7de5b2a3, type: 2}
   - {fileID: 11400000, guid: 1285b5eab40b96b45baa1471e926d497, type: 2}
-  - {fileID: 11400000, guid: a0be0afe048a5324caf707d4aa1c9ea1, type: 2}
-  - {fileID: 11400000, guid: cf8d1cb8915c02a49ade4e25e36ab26a, type: 2}
+  - {fileID: 11400000, guid: b4714f9930772124cb2f79f6f3249446, type: 2}
+  - {fileID: 11400000, guid: ed81b12ef9e831041b370a6f7aa8526c, type: 2}
   landscapes: 000000000000000001000000

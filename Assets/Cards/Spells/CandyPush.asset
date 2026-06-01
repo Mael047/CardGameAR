@@ -10,20 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ae9c2949be209d445a650d2062ad435e, type: 3}
-  m_Name: CatWarrior
+  m_Name: CandyPush
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: Cat Warrior
-  qrID: QR_001
+  cardName: Candy Push
+  qrID: QR_S02
   cardArtwork: {fileID: 0}
-  cardType: 0
+  cardType: 2
   actionCost: 1
   landscapeRequired: 0
-  landscapeAmount: 2
-  attack: 2
-  defense: 3
-  abilityType: 1
+  landscapeAmount: 0
+  attack: 0
+  defense: 0
+  abilityType: 0
   abilityActionCost: 0
-  abilityDescription: Si hay un edificio en este carril, gana +1 ATK.
-  creaturePrefab: {fileID: 171927380109893388, guid: d1cf57eed07667648bd8842759fa1e1e, type: 3}
-  floopAnimation: {fileID: 2277792357321143191, guid: d7061d2ec501adb4da1e842bf1f2be57, type: 3}
+  abilityDescription: "Mueve una criatura (aliada o enemiga) a un carril adyacente
+    v\xE1lido. Si el carril destino ya tiene una criatura, no se puede usar."
+  creaturePrefab: {fileID: 0}
+  buildingPrefab: {fileID: 0}
+  floopAnimation: {fileID: 0}
   spellEffect: {fileID: 0}

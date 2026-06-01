@@ -10,21 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ae9c2949be209d445a650d2062ad435e, type: 3}
-  m_Name: Spell
+  m_Name: Swamp Lurker
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: Spell
-  qrID: QR_01
+  cardName: Swamp Lurker
+  qrID: QR_001
   cardArtwork: {fileID: 0}
-  cardType: 2
-  actionCost: 1
-  landscapeRequired: 0
-  landscapeAmount: 0
-  attack: 3
-  defense: 0
-  abilityType: 0
-  abilityActionCost: 0
-  abilityDescription: 
-  creaturePrefab: {fileID: 0}
+  cardType: 0
+  actionCost: 2
+  landscapeRequired: 2
+  landscapeAmount: 2
+  attack: 2
+  defense: 4
+  abilityType: 2
+  abilityActionCost: 1
+  abilityDescription: No puede ser objetivo de hechizos enmigos hasta tu proximo
+    turno.
+  creaturePrefab: {fileID: 171927380109893388, guid: 51fcf8f73c3ea1040bafb3459c87a616, type: 3}
   buildingPrefab: {fileID: 0}
-  floopAnimation: {fileID: 0}
+  floopAnimation: {fileID: 8500343167191344323, guid: 36a2903e866c7184a8349d9d266daa3d, type: 3}
   spellEffect: {fileID: 0}

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d18cba09d9a77c4e96b54abff07abc5, type: 3}
+  m_Name: HuntedLands
+  m_EditorClassIdentifier: Assembly-CSharp::DeckData
+  deckName: HuntedLands
+  deckPortrait: {fileID: 0}
+  cards:
+  - {fileID: 11400000, guid: 5a66502960661ee44b8a09e35e0e3e5a, type: 2}
+  - {fileID: 11400000, guid: 784b6209c7f042a4cbcb5d99fe56cc25, type: 2}
+  - {fileID: 11400000, guid: af1d8324ecb96f244a5bc5559e34f39a, type: 2}
+  - {fileID: 11400000, guid: cdb973429f2e8e846929fe8f7de5b2a3, type: 2}
+  - {fileID: 11400000, guid: e3ae90ea016cef64d897063c894a4390, type: 2}
+  - {fileID: 11400000, guid: ac8849aab1e53c44ca80ce2649cb6c4f, type: 2}
+  landscapes: 020000000200000003000000

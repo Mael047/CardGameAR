@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skeletal Hand
   m_EditorClassIdentifier: Assembly-CSharp::CardData
   cardName: Skeletal Hand
-  qrID: QR_004
+  qrID: QR_003
   cardArtwork: {fileID: 0}
   cardType: 0
   actionCost: 1
@@ -25,5 +25,6 @@ MonoBehaviour:
   abilityActionCost: 1
   abilityDescription: Descarta un hechizo del mazo enemigo.
   creaturePrefab: {fileID: 171927380109893388, guid: b8b8b01235231ca4a89101c6fc3840ca, type: 3}
+  buildingPrefab: {fileID: 0}
   floopAnimation: {fileID: -4980162530228075440, guid: e5901ce40e7bc6f45be465c564aa05e0, type: 3}
   spellEffect: {fileID: 0}

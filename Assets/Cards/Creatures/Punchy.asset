@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ae9c2949be209d445a650d2062ad435e, type: 3}
-  m_Name: Tiny Crypt
+  m_Name: Punchy
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: Tiny Crypt
-  qrID: QR_E01
+  cardName: Punchy
+  qrID: QR_004
   cardArtwork: {fileID: 0}
-  cardType: 1
+  cardType: 0
   actionCost: 1
-  landscapeRequired: 3
+  landscapeRequired: 1
   landscapeAmount: 1
-  attack: 0
-  defense: 0
-  abilityType: 1
-  abilityActionCost: 0
-  abilityDescription: "La criatura en este carril gana +1DEF.\n "
-  creaturePrefab: {fileID: 171927380109893388, guid: ee0e7e8da41cd654d8d04e03cfdd743f, type: 3}
-  buildingPrefab: {fileID: 171927380109893388, guid: ee0e7e8da41cd654d8d04e03cfdd743f, type: 3}
-  floopAnimation: {fileID: 0}
+  attack: 3
+  defense: 2
+  abilityType: 2
+  abilityActionCost: 1
+  abilityDescription: Roba una carta inmediatamente
+  creaturePrefab: {fileID: 171927380109893388, guid: 88e0601e44ebd4c4889ab4b06fdc95da, type: 3}
+  buildingPrefab: {fileID: 0}
+  floopAnimation: {fileID: 1827226128182048838, guid: 47373e7c7636f7c468b6baa9c8f9feef, type: 3}
   spellEffect: {fileID: 0}
