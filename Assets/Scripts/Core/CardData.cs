@@ -32,4 +32,10 @@ public class CardData : ScriptableObject
     public GameObject buildingPrefab;
     public AnimationClip floopAnimation;
     public ParticleSystem spellEffect;
+
+    [Header("Audio")]
+    public AudioClip attackSFX;
+    public AudioClip damageSFX;
+    public AudioClip floopSFX;
+    public AudioClip spellSFX;
 }

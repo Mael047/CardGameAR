@@ -137,6 +137,7 @@ public class ActionsPanel : MonoBehaviour
 
     private void OnPlaySpellPressed()
     {
+        AudioManager.Instance?.PlayButtonClick();
         if (pendingCard == null || pendingCard.Data.cardType != CardType.Spell) return;
 
         bool success = GameManager.Instance.TryPlaySpell(pendingCard);
@@ -159,6 +160,7 @@ public class ActionsPanel : MonoBehaviour
 
     private void OnFloopMainPressed()
     {
+        AudioManager.Instance?.PlayButtonClick();
         if (floopTargetLane < 0) return;
 
         bool success = GameManager.Instance.TryFloop(floopTargetLane);
@@ -177,12 +179,14 @@ public class ActionsPanel : MonoBehaviour
 
     private void OnFightPressed()
     {
+        AudioManager.Instance?.PlayButtonClick();
         GameManager.Instance.ProceedToFight();
         HideCardOptions();
     }
 
     private void OnCancelPressed()
     {
+        AudioManager.Instance?.PlayButtonClick();
         HideCardOptions();
     }
 

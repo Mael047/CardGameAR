@@ -10,6 +10,14 @@ public class ARBoardManager : MonoBehaviour
         public Vector3 creatureOffset = Vector3.zero;
         public Vector3 buildingOffset = new Vector3(0.06f, 0, 0);
         public Vector3 cardRotation = new Vector3(0, 180, 0);
+        public Vector3 landscapeOffset = Vector3.zero;
+    }
+
+    [System.Serializable]
+    public struct LandscapeLanePrefabEntry
+    {
+        public LandscapeType type;
+        public GameObject prefab;
     }
 
     public static ARBoardManager Instance { get; private set; }
@@ -27,6 +35,9 @@ public class ARBoardManager : MonoBehaviour
     [Tooltip("Multiplicador sobre la escala base del prefab")]
     public Vector3 cardScale = new Vector3(1, 1, 1);
 
+    [Header("Prefabs 3D de paisajes para los carriles")]
+    public LandscapeLanePrefabEntry[] landscapeLanePrefabs = new LandscapeLanePrefabEntry[5];
+
     [Header("Colores de paisajes para los planos de los carriles")]
     public Color colorNicelands = new Color(0.2f, 0.7f, 0.2f, 0.4f);
     public Color colorCornfield = new Color(0.9f, 0.8f, 0.1f, 0.4f);
@@ -38,6 +49,9 @@ public class ARBoardManager : MonoBehaviour
     private GameObject[] p1SpawnedBuildings = new GameObject[3];
     private GameObject[] p2SpawnedCreatures = new GameObject[3];
     private GameObject[] p2SpawnedBuildings = new GameObject[3];
+
+    private GameObject[] p1LaneLandscapes = new GameObject[3];
+    private GameObject[] p2LaneLandscapes = new GameObject[3];
 
     private Dictionary<GameObject, Vector3> basePositions = new Dictionary<GameObject, Vector3>();
     private Dictionary<GameObject, Vector3> baseScales = new Dictionary<GameObject, Vector3>();
@@ -93,13 +107,15 @@ public class ARBoardManager : MonoBehaviour
         to.creatureOffset = from.creatureOffset;
         to.buildingOffset = from.buildingOffset;
         to.cardRotation = from.cardRotation;
+        to.landscapeOffset = from.landscapeOffset;
     }
 
     private bool LaneConfigsEqual(LaneConfig a, LaneConfig b)
     {
         return a.creatureOffset == b.creatureOffset
             && a.buildingOffset == b.buildingOffset
-            && a.cardRotation == b.cardRotation;
+            && a.cardRotation == b.cardRotation
+            && a.landscapeOffset == b.landscapeOffset;
     }
 
     private Color GetLandscapeColor(LandscapeType landscape)
@@ -113,6 +129,15 @@ public class ARBoardManager : MonoBehaviour
             LandscapeType.Rainbow => colorRainbow,
             _ => Color.clear
         };
+    }
+
+    private GameObject GetLandscapePrefab(LandscapeType landscape)
+    {
+        if (landscapeLanePrefabs == null) return null;
+        foreach (var entry in landscapeLanePrefabs)
+            if (entry.type == landscape)
+                return entry.prefab;
+        return null;
     }
 
     private void OnEnable()
@@ -133,6 +158,17 @@ public class ARBoardManager : MonoBehaviour
         GameEvents.OnCardDestroyed -= OnCardRemoved;
         GameEvents.OnTurnChanged -= OnTurnChanged;
         GameEvents.OnGameStateChanged -= OnGameStateChanged;
+
+        DestroyLaneLandscapes();
+    }
+
+    private void DestroyLaneLandscapes()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            if (p1LaneLandscapes[i] != null) { Destroy(p1LaneLandscapes[i]); p1LaneLandscapes[i] = null; }
+            if (p2LaneLandscapes[i] != null) { Destroy(p2LaneLandscapes[i]); p2LaneLandscapes[i] = null; }
+        }
     }
 
     private void OnGameStateChanged(GameState state)
@@ -197,22 +233,50 @@ public class ARBoardManager : MonoBehaviour
 
     private void UpdatePlayerLanes(PlayerState player, Transform[] anchors, GameObject[] spawnedCreatures, GameObject[] spawnedBuildings, LaneConfig[] settings)
     {
+        GameObject[] laneLandscapes = player == GameManager.Instance?.Players[0] ? p1LaneLandscapes : p2LaneLandscapes;
+
         for (int i = 0; i < 3; i++)
         {
             HandleCardVisual(player.CreatureLanes[i], anchors[i], ref spawnedCreatures[i], settings[i], false);
             HandleCardVisual(player.BuildingLanes[i], anchors[i], ref spawnedBuildings[i], settings[i], true);
 
-            // Aplica el color del paisaje al plano del carril
-            if (anchors[i] != null)
+            if (anchors[i] == null) continue;
+
+            LandscapeType landscape = player.Landscapes != null && i < player.Landscapes.Length
+                ? player.Landscapes[i]
+                : LandscapeType.Nicelands;
+
+            // Prefab 3D del paisaje
+            GameObject landscapePrefab = GetLandscapePrefab(landscape);
+            if (landscapePrefab != null)
             {
-                MeshRenderer plane = anchors[i].GetComponentInChildren<MeshRenderer>();
-                if (plane != null)
+                if (laneLandscapes[i] == null || laneLandscapes[i].name != landscapePrefab.name)
                 {
-                    LandscapeType landscape = player.Landscapes != null && i < player.Landscapes.Length
-                        ? player.Landscapes[i]
-                        : LandscapeType.Nicelands;
-                    plane.material.color = GetLandscapeColor(landscape);
+                    if (laneLandscapes[i] != null)
+                        Destroy(laneLandscapes[i]);
+                    laneLandscapes[i] = Instantiate(landscapePrefab, anchors[i]);
+                    laneLandscapes[i].transform.localRotation = Quaternion.identity;
                 }
+                if (laneLandscapes[i] != null)
+                    laneLandscapes[i].transform.localPosition = settings[i].landscapeOffset;
+            }
+            else
+            {
+                if (laneLandscapes[i] != null)
+                {
+                    Destroy(laneLandscapes[i]);
+                    laneLandscapes[i] = null;
+                }
+            }
+
+            // Color de respaldo en el plano
+            MeshRenderer plane = anchors[i].GetComponentInChildren<MeshRenderer>();
+            if (plane != null)
+            {
+                bool usePlane = landscapePrefab == null;
+                plane.gameObject.SetActive(usePlane);
+                if (usePlane)
+                    plane.material.color = GetLandscapeColor(landscape);
             }
         }
     }

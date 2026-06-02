@@ -33,4 +33,7 @@ public static class GameEvents
     // Una carta fue robada (jugador, carta)
     public static Action<int, CardInstance> OnCardDrawn;
 
+    // Una criatura recibe daño (jugador, carril, carta)
+    public static Action<int, int, CardInstance> OnDamageTaken;
+
 }

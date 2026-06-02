@@ -24,6 +24,7 @@ public class GameOverPanel : MonoBehaviour
 
     public void RestartGame()
     {
+        AudioManager.Instance?.PlayButtonClick();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 

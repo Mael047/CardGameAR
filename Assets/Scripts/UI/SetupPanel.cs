@@ -206,6 +206,7 @@ public class SetupPanel : MonoBehaviour
     // ── El jugador selecciona un tipo de paisaje ──────────────────────────
     private void OnLandscapeSelected(LandscapeType landscape)
     {
+        AudioManager.Instance?.PlayButtonClick();
         selectedLandscape = landscape;
         textInstruction.text = $"Paisaje '{landscape}' seleccionado. Ahora elige un carril.";
 
@@ -216,6 +217,7 @@ public class SetupPanel : MonoBehaviour
     // ── El jugador presiona un carril para colocar el paisaje ─────────────
     private void OnLaneButtonPressed(int laneIndex)
     {
+        AudioManager.Instance?.PlayButtonClick();
         if (!selectedLandscape.HasValue) return;
         if (assignedLandscapes[laneIndex].HasValue) return; // Ya ocupado
 
@@ -245,6 +247,7 @@ public class SetupPanel : MonoBehaviour
     // ── El jugador confirma su configuración ──────────────────────────────
     private void OnConfirmPressed()
     {
+        AudioManager.Instance?.PlayButtonClick();
         // Aplica los paisajes elegidos al estado del jugador
         PlayerState player = GameManager.Instance.Players[setupPlayerIndex];
         for (int i = 0; i < 3; i++)

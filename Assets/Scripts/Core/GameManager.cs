@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
@@ -230,6 +231,8 @@ public class GameManager : MonoBehaviour
         bool attackerDestroyed = attacker.TakeDamage(defender.EffectiveAttack);
         bool defenderDestroyed = defender.TakeDamage(attacker.EffectiveAttack);
 
+        GameEvents.OnDamageTaken?.Invoke(ActivePlayerIndex, lane, attacker);
+        GameEvents.OnDamageTaken?.Invoke(opponentIndex, lane, defender);
         GameEvents.OnCreatureAttacked?.Invoke(ActivePlayerIndex, lane, attacker.EffectiveAttack);
 
         if (defenderDestroyed) { OpponentPlayer.DestroyCreature(lane); GameEvents.OnCardDestroyed?.Invoke(opponentIndex, lane); }
@@ -263,16 +266,12 @@ public class GameManager : MonoBehaviour
     // ── Habilidades ───────────────────────────────────────────────────────
     private void ApplyOnEnterPassives(CardInstance card, int laneIndex)
     {
-        if (card.Data.cardName == "Corn Stalker")
-        {
-            CardInstance drawn = ActivePlayer.DrawCard();
-            if (drawn != null) GameEvents.OnCardDrawn?.Invoke(ActivePlayerIndex, drawn);
-        }
+        // (reservado para pasivas de entrada)
     }
 
     private void ApplyBuildingPassive(CardInstance building, int laneIndex)
     {
-        if (building.Data.cardName == "Swamp Hut")
+        if (building.Data.cardName == "Tiny Crypt")
             ActivePlayer.CreatureLanes[laneIndex]?.AddDefenseBonus(1);
     }
 
@@ -281,9 +280,38 @@ public class GameManager : MonoBehaviour
         int opp = 1 - ActivePlayerIndex;
         switch (card.Data.cardName)
         {
-            
+            case "Punchy":
+                CardInstance drawn = ActivePlayer.DrawCard();
+                if (drawn != null)
+                    GameEvents.OnCardDrawn?.Invoke(ActivePlayerIndex, drawn);
+                break;
+
+            case "Skeletal Hand":
+                List<CardInstance> tempDeck = new List<CardInstance>();
+                CardInstance discardedSpell = null;
+                while (OpponentPlayer.Deck.Count > 0)
+                {
+                    CardInstance c = OpponentPlayer.Deck.Pop();
+                    if (discardedSpell == null && c.Data.cardType == CardType.Spell)
+                        discardedSpell = c;
+                    else
+                        tempDeck.Add(c);
+                }
+                for (int j = tempDeck.Count - 1; j >= 0; j--)
+                    OpponentPlayer.Deck.Push(tempDeck[j]);
+                if (discardedSpell != null)
+                {
+                    OpponentPlayer.Discard.Add(discardedSpell);
+                    Debug.Log($"Skeletal Hand: descartó {discardedSpell.Data.cardName} del mazo enemigo.");
+                }
+                break;
+
+            case "Swamp Lurker":
+                card.spellImmune = true;
+                break;
+
             case "Sugar Golem":
-                card.AddDefenseBonus(1); ;
+                card.AddDefenseBonus(1);
                 break;
         }
     }
@@ -293,13 +321,16 @@ public class GameManager : MonoBehaviour
         int opp = 1 - ActivePlayerIndex;
         switch (spell.Data.cardName)
         {
-            case "Spell":
+            case "Science Blast":
                 if (laneIndex >= 0)
                 {
                     CardInstance target = OpponentPlayer.CreatureLanes[laneIndex];
                     if (target != null)
                     {
-                        if (target.TakeDamage(3))
+                        if (target.spellImmune) break;
+                        bool destroyed = target.TakeDamage(2);
+                        GameEvents.OnDamageTaken?.Invoke(opp, laneIndex, target);
+                        if (destroyed)
                         {
                             OpponentPlayer.DestroyCreature(laneIndex);
                             GameEvents.OnCardDestroyed?.Invoke(opp, laneIndex);
@@ -307,10 +338,72 @@ public class GameManager : MonoBehaviour
                     }
                     else
                     {
-                        OpponentPlayer.TakeDamage(3);
-                        GameEvents.OnDirectDamage?.Invoke(opp, 3);
-                        GameEvents.OnHPChanged?.Invoke(opp, OpponentPlayer.CurrentHP);
+                        CardInstance targetBuilding = OpponentPlayer.BuildingLanes[laneIndex];
+                        if (targetBuilding != null)
+                        {
+                            targetBuilding.TakeDamage(2);
+                            GameEvents.OnDamageTaken?.Invoke(opp, laneIndex, targetBuilding);
+                        }
+                        else
+                        {
+                            OpponentPlayer.TakeDamage(2);
+                            GameEvents.OnDirectDamage?.Invoke(opp, 2);
+                            GameEvents.OnHPChanged?.Invoke(opp, OpponentPlayer.CurrentHP);
+                        }
                     }
+                }
+                break;
+
+            case "Candy Push":
+                if (laneIndex >= 0)
+                {
+                    CardInstance target = ActivePlayer.CreatureLanes[laneIndex];
+                    bool isOpp = false;
+                    if (target == null)
+                    {
+                        target = OpponentPlayer.CreatureLanes[laneIndex];
+                        isOpp = true;
+                    }
+                    if (target != null && !target.spellImmune)
+                    {
+                        PlayerState owner = isOpp ? OpponentPlayer : ActivePlayer;
+                        int left = laneIndex - 1;
+                        int right = laneIndex + 1;
+                        int destLane = -1;
+                        if (left >= 0 && owner.CreatureLanes[left] == null)
+                            destLane = left;
+                        else if (right < 3 && owner.CreatureLanes[right] == null)
+                            destLane = right;
+
+                        if (destLane >= 0)
+                        {
+                            int ownerIdx = isOpp ? opp : ActivePlayerIndex;
+                            owner.CreatureLanes[laneIndex] = null;
+                            owner.CreatureLanes[destLane] = target;
+                            target.PlaceInLane(destLane);
+                            GameEvents.OnCardPlayed?.Invoke(ownerIdx, destLane, target);
+                        }
+                    }
+                }
+                break;
+
+            case "Boo To You":
+                if (laneIndex >= 0)
+                {
+                    CardInstance target = OpponentPlayer.CreatureLanes[laneIndex];
+                    if (target != null && target.CurrentState == CardState.Flooped)
+                    {
+                        target.ReadyUp();
+                        Debug.Log("Boo To You: canceló el Floop enemigo.");
+                    }
+                }
+                break;
+
+            case "Smell":
+                for (int i = 0; i < 3; i++)
+                {
+                    CardInstance c = OpponentPlayer.CreatureLanes[i];
+                    if (c != null) c.AddAttackBonus(-2);
                 }
                 break;
         }
@@ -323,9 +416,9 @@ public class GameManager : MonoBehaviour
             CardInstance creature = ActivePlayer.CreatureLanes[i];
             if (creature != null)
             {
-                if (creature.Data.cardName == "Candy Warrior" && ActivePlayer.BuildingLanes[i] != null)
+                if (creature.Data.cardName == "Cat Warrior" && ActivePlayer.BuildingLanes[i] != null)
                     creature.AddAttackBonus(1);
-                if (creature.Data.cardName == "Dogboy" && OpponentPlayer.CurrentHP > ActivePlayer.CurrentHP)
+                if (creature.Data.cardName == "Ghosty" && OpponentPlayer.CurrentHP > ActivePlayer.CurrentHP)
                     creature.AddAttackBonus(2);
             }
 

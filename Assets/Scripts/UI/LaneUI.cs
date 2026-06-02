@@ -31,8 +31,11 @@ public class LaneUI : MonoBehaviour
             buttonSelectLane.onClick.RemoveAllListeners();
 
             if (buttonEnabled)
-                buttonSelectLane.onClick.AddListener(
-                    () => onLaneSelected(PlayerIndex, LaneIndex));
+                buttonSelectLane.onClick.AddListener(() =>
+                {
+                    AudioManager.Instance?.PlayButtonClick();
+                    onLaneSelected(PlayerIndex, LaneIndex);
+                });
 
             buttonSelectLane.gameObject.SetActive(buttonEnabled);
         }

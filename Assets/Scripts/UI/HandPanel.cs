@@ -50,6 +50,7 @@ public class HandPanel : MonoBehaviour
 
     private void OnCardSelected(CardUI cardUI)
     {
+        AudioManager.Instance?.PlayButtonClick();
         if (selectedCard == cardUI)
         {
             Deselect();

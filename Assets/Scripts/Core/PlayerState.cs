@@ -104,8 +104,9 @@ public class PlayerState
 
     public void TakeDamage(int amount)
     {
-        CurrentHP = Mathf.Max(0, CurrentHP - amount);
-        Debug.Log($"{PlayerName}: {amount} de daño. HP: {CurrentHP}/{MAX_HP}");
+        int finalDamage = Mathf.Max(0, amount);
+        CurrentHP = Mathf.Max(0, CurrentHP - finalDamage);
+        Debug.Log($"{PlayerName}: {finalDamage} de daño. HP: {CurrentHP}/{MAX_HP}");
     }
 
     public bool MeetsLandscapeRequirement(CardData card)

@@ -7,6 +7,7 @@ public class CardInstance
     public int AccumulatedDamage { get; private set; }
     public CardState CurrentState { get; private set; }
     public int LaneIndex { get; private set; }
+    public bool spellImmune;
 
     public int EffectiveAttack => Data.attack + attackBonus;
     public int EffectiveDefense => Data.defense + defenseBonus;
@@ -66,6 +67,7 @@ public class CardInstance
         CurrentState = CardState.Ready;
         attackBonus = 0;
         defenseBonus = 0;
+        spellImmune = false;
         Debug.Log($"{Data.cardName} lista.");
     }
 
@@ -79,5 +81,6 @@ public class CardInstance
         CurrentState = CardState.Ready;
         attackBonus = 0;
         defenseBonus = 0;
+        spellImmune = false;
     }
 }

@@ -23,12 +23,12 @@ Build settings only include `Assets/Props/Low Poly Graveyard/Scenes/SampleScene.
 
 ## Architecture
 
-- **Singleton managers**: `GameManager`, `ARManager`, `ARBoardManager`, `ARPlacementManager`, `UIManager`, `ActionsPanel`, `SetupPanel`
+- **Singleton managers**: `GameManager`, `AudioManager`, `ARManager`, `ARBoardManager`, `ARPlacementManager`, `UIManager`, `ActionsPanel`, `SetupPanel`
 - **Event bus**: `GameEvents` static class with `System.Action` delegates. Subscribe in `OnEnable`/`OnDisable`.
 - **Card data**: `CardData : ScriptableObject` with `[CreateAssetMenu(fileName = "NewCard", menuName = "CardWars/Card Data")]`. Decks are `DeckData : ScriptableObject` with `[CreateAssetMenu(fileName = "NewDeck", menuName = "CardWars/Deck Data")]`.
 - **Turn states**: `Setup → TurnStart → Actions → Fight → EndTurn → GameOver`
 - **3 lanes per player**, each holds one `Creature` and one `Building`. Landscape types: `Nicelands, Cornfield, UselessSwamp, SpookyCemetery, Rainbow`.
-- **Floop mechanic**: Physical card rotation (>60°) detected by `ARCardTracker.CheckFloopOrientation()` triggers `GameManager.TryFloop()`.
+- **Floop mechanic**: Physical card rotation (>60°) detected by `ARCardTracker.CheckFloopOrientation()` triggers `GameManager.TryFloop()`. Floop activa habilidades especiales (no es un modo defensa genérico).
 
 ## Key workflows
 
@@ -81,6 +81,36 @@ En el Inspector del `SetupPanel`:
 2. En **Carriles — UI visual**, asigna los 3 `Image` del fondo de los carriles a `laneBackgrounds`.
 
 Los sprites se guardan en un `Dictionary<LandscapeType, Sprite>` estático en `Awake()`. No es necesario reiniciar si se cambian en el Editor — basta con re-entrar en Play Mode.
+
+## AudioManager — Configurar sonidos
+
+`AudioManager` es un singleton que se suscribe a `GameEvents`. Para configurarlo:
+
+1. Crea un GameObject vacío `"AudioManager"` en la escena y añádele `AudioManager.cs`
+2. Créale dos hijos con `AudioSource`:
+   - `musicSource` (loop activado, Volume ~0.5)
+   - `sfxSource` (loop desactivado, Volume ~1.0)
+3. Asigna clips a los campos del `AudioManager`:
+   - `bgMusic` — música de fondo
+   - `turnChangeSFX` — cambio de turno
+   - `buttonClickSFX` — clics de UI
+   - `fightSFX` — inicio de fase Fight
+   - `gameOverSFX` — fin de partida
+
+Los sonidos por carta (`attackSFX`, `damageSFX`, `floopSFX`, `spellSFX`) se asignan directamente en cada `CardData`. El `AudioManager` los reproduce automáticamente al ocurrir el evento correspondiente.
+
+Referencia de eventos de audio:
+
+| Evento | Clip que reproduce |
+|--------|-------------------|
+| `OnCreatureAttacked` | `attacker.Data.attackSFX` |
+| `OnDamageTaken` | `victim.Data.damageSFX` |
+| `OnFloopActivated` | `card.Data.floopSFX` |
+| `OnCardPlayed` (Spell) | `card.Data.spellSFX` |
+| `OnGameStateChanged → Fight` | `fightSFX` |
+| `OnTurnChanged` | `turnChangeSFX` |
+| `OnGameOver` | `gameOverSFX` |
+| Botones UI | `buttonClickSFX` via `AudioManager.Instance.PlayButtonClick()` |
 
 ## Known issues
 
