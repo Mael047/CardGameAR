@@ -26,5 +26,13 @@ MonoBehaviour:
   abilityDescription: "Reduce todo el da\xF1o recibido en 1.\t"
   creaturePrefab: {fileID: 171927380109893388, guid: 543b623ed1008c049a5563748ef3b010, type: 3}
   buildingPrefab: {fileID: 0}
-  floopAnimation: {fileID: 7400000, guid: 54948340193221b4aa8e859e77a0d367, type: 3}
+  floopAnimation: {fileID: 7400000, guid: 3aa072121bfc60b4f8f1bc94f6756e3c, type: 3}
   spellEffect: {fileID: 0}
+  attackSFX: {fileID: 0}
+  damageSFX: {fileID: 0}
+  floopSFX: {fileID: 0}
+  spellSFX: {fileID: 0}
+  idleAnimation: {fileID: 7400000, guid: 54948340193221b4aa8e859e77a0d367, type: 3}
+  attackAnimation: {fileID: 7400000, guid: c079a833bce9f244197c6d6a59349939, type: 3}
+  damageAnimation: {fileID: 7400000, guid: 5aadc29268b688b4bbfa27a9979d6e03, type: 3}
+  deathAnimation: {fileID: 7400000, guid: 346a6962ca56a3b42aeea7537848e8e0, type: 3}

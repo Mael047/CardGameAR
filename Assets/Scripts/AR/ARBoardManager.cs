@@ -56,6 +56,9 @@ public class ARBoardManager : MonoBehaviour
     private Dictionary<GameObject, Vector3> basePositions = new Dictionary<GameObject, Vector3>();
     private Dictionary<GameObject, Vector3> baseScales = new Dictionary<GameObject, Vector3>();
 
+    // Mapa (player, lane) → animator para invocar animaciones desde GameManager
+    private ARCardAnimation[,] cardAnimations = new ARCardAnimation[2, 3];
+
     private ObserverBehaviour observer;
     private bool isTracked = false;
 
@@ -222,6 +225,48 @@ public class ARBoardManager : MonoBehaviour
         }
     }
 
+    public void PlayAttackAnimation(int playerIndex, int laneIndex)
+    {
+        var anim = cardAnimations[playerIndex, laneIndex];
+        if (anim != null) anim.PlayAttack();
+    }
+
+    public float GetAttackLength(int playerIndex, int laneIndex)
+    {
+        var anim = cardAnimations[playerIndex, laneIndex];
+        return anim != null ? anim.GetAttackLength() : 0.6f;
+    }
+
+    public void PlayDamageAnimation(int playerIndex, int laneIndex)
+    {
+        var anim = cardAnimations[playerIndex, laneIndex];
+        if (anim != null) anim.PlayDamage();
+    }
+
+    public float GetDamageLength(int playerIndex, int laneIndex)
+    {
+        var anim = cardAnimations[playerIndex, laneIndex];
+        return anim != null ? anim.GetDamageLength() : 0.4f;
+    }
+
+    public void PlayDeathAnimation(int playerIndex, int laneIndex)
+    {
+        var anim = cardAnimations[playerIndex, laneIndex];
+        if (anim != null) anim.PlayDeath();
+    }
+
+    public float GetDeathLength(int playerIndex, int laneIndex)
+    {
+        var anim = cardAnimations[playerIndex, laneIndex];
+        return anim != null ? anim.GetDeathLength() : 1.2f;
+    }
+
+    public void PlayIdleAnimation(int playerIndex, int laneIndex)
+    {
+        var anim = cardAnimations[playerIndex, laneIndex];
+        if (anim != null) anim.PlayIdle();
+    }
+
     public void RefreshBoard()
     {
         if (GameManager.Instance == null) return;
@@ -235,10 +280,12 @@ public class ARBoardManager : MonoBehaviour
     {
         GameObject[] laneLandscapes = player == GameManager.Instance?.Players[0] ? p1LaneLandscapes : p2LaneLandscapes;
 
+        int playerIdx = player == GameManager.Instance?.Players[0] ? 0 : 1;
+
         for (int i = 0; i < 3; i++)
         {
-            HandleCardVisual(player.CreatureLanes[i], anchors[i], ref spawnedCreatures[i], settings[i], false);
-            HandleCardVisual(player.BuildingLanes[i], anchors[i], ref spawnedBuildings[i], settings[i], true);
+            HandleCardVisual(player.CreatureLanes[i], anchors[i], ref spawnedCreatures[i], settings[i], false, playerIdx, i);
+            HandleCardVisual(player.BuildingLanes[i], anchors[i], ref spawnedBuildings[i], settings[i], true, playerIdx, i);
 
             if (anchors[i] == null) continue;
 
@@ -281,12 +328,13 @@ public class ARBoardManager : MonoBehaviour
         }
     }
 
-    private void HandleCardVisual(CardInstance card, Transform anchor, ref GameObject spawnedObj, LaneConfig cfg, bool isBuilding)
+    private void HandleCardVisual(CardInstance card, Transform anchor, ref GameObject spawnedObj, LaneConfig cfg, bool isBuilding, int playerIdx, int laneIdx)
     {
         if (card == null)
         {
             if (spawnedObj != null)
             {
+                cardAnimations[playerIdx, laneIdx] = null;
                 basePositions.Remove(spawnedObj);
                 baseScales.Remove(spawnedObj);
                 Destroy(spawnedObj);
@@ -305,6 +353,15 @@ public class ARBoardManager : MonoBehaviour
                 spawnedObj = Instantiate(prefab, anchor);
                 basePositions[spawnedObj] = spawnedObj.transform.localPosition;
                 baseScales[spawnedObj] = spawnedObj.transform.localScale;
+
+                var anim = spawnedObj.GetComponent<ARCardAnimation>();
+                if (anim == null)
+                    anim = spawnedObj.GetComponentInChildren<ARCardAnimation>();
+                if (anim != null)
+                {
+                    anim.Setup();
+                    cardAnimations[playerIdx, laneIdx] = anim;
+                }
             }
         }
 

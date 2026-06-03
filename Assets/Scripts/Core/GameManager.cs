@@ -122,6 +122,7 @@ public class GameManager : MonoBehaviour
         ActivePlayer.PlaceCreature(card, laneIndex);
         ApplyOnEnterPassives(card, laneIndex);
         GameEvents.OnCardPlayed?.Invoke(ActivePlayerIndex, laneIndex, card);
+        ActionsPanel.Instance?.ShowNotification($"¡{card.Data.cardName} colocada en Carril {laneIndex + 1}!");
         return true;
     }
 
@@ -137,6 +138,7 @@ public class GameManager : MonoBehaviour
         ActivePlayer.PlaceBuilding(card, laneIndex);
         ApplyBuildingPassive(card, laneIndex);
         GameEvents.OnCardPlayed?.Invoke(ActivePlayerIndex, laneIndex, card);
+        ActionsPanel.Instance?.ShowNotification($"¡{card.Data.cardName} construida en Carril {laneIndex + 1}!");
         return true;
     }
 
@@ -156,15 +158,15 @@ public class GameManager : MonoBehaviour
         ResolveSpellEffect(card, laneIndex);
         ActivePlayer.DiscardSpell(card);
 
-        // Notifica la UI para refrescar la mano
         GameEvents.OnCardPlayed?.Invoke(ActivePlayerIndex, laneIndex, card);
+        ActionsPanel.Instance?.ShowNotification($"¡{card.Data.cardName} lanzado!");
         return true;
     }
 
     public bool TryFloop(int laneIndex)
     {
         if (CurrentState != GameState.Actions) { Debug.LogWarning("No es fase de acciones."); return false; }
-        if (isFirstTurn && ActivePlayerIndex == 0) { Debug.LogWarning("Primer turno: no Floop."); return false; }
+        if (isFirstTurn) { Debug.LogWarning("Primer turno: no se puede hacer Floop."); return false; }
 
         CardInstance creature = ActivePlayer.CreatureLanes[laneIndex];
         if (creature == null || !creature.CanFloop) { Debug.LogWarning("No puede Flopear."); return false; }
@@ -188,9 +190,9 @@ public class GameManager : MonoBehaviour
     // ── Fight ─────────────────────────────────────────────────────────────
     private void HandleFight()
     {
-        if (isFirstTurn && ActivePlayerIndex == 0)
+        if (isFirstTurn)
         {
-            Debug.Log("Primer turno: jugador 1 no pelea.");
+            Debug.Log("Primer turno: no hay fase de combate.");
             ChangeState(GameState.EndTurn);
             return;
         }
@@ -209,12 +211,20 @@ public class GameManager : MonoBehaviour
             CardInstance defender = OpponentPlayer.CreatureLanes[lane];
 
             if (defender != null)
-                ResolveCombat(attacker, defender, lane, opponentIndex);
+                yield return StartCoroutine(ResolveCombat(attacker, defender, lane, opponentIndex));
             else
             {
-                OpponentPlayer.TakeDamage(attacker.EffectiveAttack);
-                GameEvents.OnDirectDamage?.Invoke(opponentIndex, attacker.EffectiveAttack);
+                if (ARBoardManager.Instance != null)
+                {
+                    ARBoardManager.Instance.PlayAttackAnimation(ActivePlayerIndex, lane);
+                    yield return new WaitForSeconds(ARBoardManager.Instance.GetAttackLength(ActivePlayerIndex, lane));
+                }
+
+                int dmg = attacker.EffectiveAttack;
+                OpponentPlayer.TakeDamage(dmg);
+                GameEvents.OnDirectDamage?.Invoke(opponentIndex, dmg);
                 GameEvents.OnHPChanged?.Invoke(opponentIndex, OpponentPlayer.CurrentHP);
+                ActionsPanel.Instance?.ShowNotification($"¡{attacker.Data.cardName} ataca por {dmg} de daño directo!");
             }
 
             attacker.MarkAsExhausted();
@@ -225,24 +235,82 @@ public class GameManager : MonoBehaviour
         ChangeState(GameState.EndTurn);
     }
 
-    private void ResolveCombat(CardInstance attacker, CardInstance defender,
-                               int lane, int opponentIndex)
+    private IEnumerator ResolveCombat(CardInstance attacker, CardInstance defender,
+                                      int lane, int opponentIndex)
     {
-        bool attackerDestroyed = attacker.TakeDamage(defender.EffectiveAttack);
-        bool defenderDestroyed = defender.TakeDamage(attacker.EffectiveAttack);
+        ActionsPanel.Instance?.ShowNotification(
+            $"¡{attacker.Data.cardName} ataca a {defender.Data.cardName}!");
+
+        // 1. Ataque del atacante
+        if (ARBoardManager.Instance != null)
+        {
+            ARBoardManager.Instance.PlayAttackAnimation(ActivePlayerIndex, lane);
+            yield return new WaitForSeconds(ARBoardManager.Instance.GetAttackLength(ActivePlayerIndex, lane));
+        }
+
+        // 2. Contraataque del defensor
+        if (ARBoardManager.Instance != null)
+        {
+            ARBoardManager.Instance.PlayAttackAnimation(opponentIndex, lane);
+            yield return new WaitForSeconds(ARBoardManager.Instance.GetAttackLength(opponentIndex, lane));
+        }
+
+        // 3. Daño simultáneo
+        int atkDmg = attacker.EffectiveAttack;
+        int defDmg = defender.EffectiveAttack;
+        bool attackerDestroyed = attacker.TakeDamage(defDmg);
+        bool defenderDestroyed = defender.TakeDamage(atkDmg);
 
         GameEvents.OnDamageTaken?.Invoke(ActivePlayerIndex, lane, attacker);
         GameEvents.OnDamageTaken?.Invoke(opponentIndex, lane, defender);
-        GameEvents.OnCreatureAttacked?.Invoke(ActivePlayerIndex, lane, attacker.EffectiveAttack);
+        GameEvents.OnCreatureAttacked?.Invoke(ActivePlayerIndex, lane, atkDmg);
 
-        if (defenderDestroyed) { OpponentPlayer.DestroyCreature(lane); GameEvents.OnCardDestroyed?.Invoke(opponentIndex, lane); }
-        if (attackerDestroyed) { ActivePlayer.DestroyCreature(lane); GameEvents.OnCardDestroyed?.Invoke(ActivePlayerIndex, lane); }
+        // 4. Daño al defensor
+        if (ARBoardManager.Instance != null)
+        {
+            ARBoardManager.Instance.PlayDamageAnimation(opponentIndex, lane);
+            yield return new WaitForSeconds(ARBoardManager.Instance.GetDamageLength(opponentIndex, lane));
+        }
+
+        // 5. Daño reflejo al atacante
+        if (ARBoardManager.Instance != null)
+        {
+            ARBoardManager.Instance.PlayDamageAnimation(ActivePlayerIndex, lane);
+            yield return new WaitForSeconds(ARBoardManager.Instance.GetDamageLength(ActivePlayerIndex, lane));
+        }
+
+        // 6. Muerte con espera dinámica
+        if (defenderDestroyed)
+        {
+            ActionsPanel.Instance?.ShowNotification(
+                $"¡{defender.Data.cardName} destruido en combate!", 2f);
+            if (ARBoardManager.Instance != null)
+            {
+                ARBoardManager.Instance.PlayDeathAnimation(opponentIndex, lane);
+                yield return new WaitForSeconds(ARBoardManager.Instance.GetDeathLength(opponentIndex, lane));
+            }
+            OpponentPlayer.DestroyCreature(lane);
+            GameEvents.OnCardDestroyed?.Invoke(opponentIndex, lane);
+        }
+
+        if (attackerDestroyed)
+        {
+            ActionsPanel.Instance?.ShowNotification(
+                $"¡{attacker.Data.cardName} destruido en combate!", 2f);
+            if (ARBoardManager.Instance != null)
+            {
+                ARBoardManager.Instance.PlayDeathAnimation(ActivePlayerIndex, lane);
+                yield return new WaitForSeconds(ARBoardManager.Instance.GetDeathLength(ActivePlayerIndex, lane));
+            }
+            ActivePlayer.DestroyCreature(lane);
+            GameEvents.OnCardDestroyed?.Invoke(ActivePlayerIndex, lane);
+        }
     }
 
     // ── EndTurn ───────────────────────────────────────────────────────────
     private void HandleEndTurn()
     {
-        if (isFirstTurn && ActivePlayerIndex == 0) isFirstTurn = false;
+        isFirstTurn = false;
         ActivePlayerIndex = 1 - ActivePlayerIndex;
         TurnNumber++;
         GameEvents.OnTurnChanged?.Invoke(ActivePlayerIndex);
@@ -319,21 +387,32 @@ public class GameManager : MonoBehaviour
     private void ResolveSpellEffect(CardInstance spell, int laneIndex = -1)
     {
         int opp = 1 - ActivePlayerIndex;
+        SpellVFX vfx = SpellVFX.Instance;
+        ParticleSystem cardParticle = spell.Data.spellEffect;
         switch (spell.Data.cardName)
         {
             case "Science Blast":
                 if (laneIndex >= 0)
                 {
+                    vfx?.PlayAtLane(opp, laneIndex, cardParticle, vfx.scienceBlastColor);
                     CardInstance target = OpponentPlayer.CreatureLanes[laneIndex];
                     if (target != null)
                     {
                         if (target.spellImmune) break;
+                        ARBoardManager.Instance?.PlayDamageAnimation(opp, laneIndex);
                         bool destroyed = target.TakeDamage(2);
                         GameEvents.OnDamageTaken?.Invoke(opp, laneIndex, target);
+                        ActionsPanel.Instance?.ShowNotification(
+                            $"¡Science Blast! {target.Data.cardName} recibe 2 de daño.");
                         if (destroyed)
                         {
+                            ARBoardManager.Instance?.PlayDeathAnimation(opp, laneIndex);
                             OpponentPlayer.DestroyCreature(laneIndex);
                             GameEvents.OnCardDestroyed?.Invoke(opp, laneIndex);
+                        }
+                        else
+                        {
+                            ARBoardManager.Instance?.PlayIdleAnimation(opp, laneIndex);
                         }
                     }
                     else
@@ -341,14 +420,19 @@ public class GameManager : MonoBehaviour
                         CardInstance targetBuilding = OpponentPlayer.BuildingLanes[laneIndex];
                         if (targetBuilding != null)
                         {
+                            ARBoardManager.Instance?.PlayDamageAnimation(opp, laneIndex);
                             targetBuilding.TakeDamage(2);
                             GameEvents.OnDamageTaken?.Invoke(opp, laneIndex, targetBuilding);
+                            ActionsPanel.Instance?.ShowNotification(
+                                $"¡Science Blast! {targetBuilding.Data.cardName} recibe 2 de daño.");
                         }
                         else
                         {
                             OpponentPlayer.TakeDamage(2);
                             GameEvents.OnDirectDamage?.Invoke(opp, 2);
                             GameEvents.OnHPChanged?.Invoke(opp, OpponentPlayer.CurrentHP);
+                            ActionsPanel.Instance?.ShowNotification(
+                                "¡Science Blast! 2 de daño directo al oponente.");
                         }
                     }
                 }
@@ -375,13 +459,22 @@ public class GameManager : MonoBehaviour
                         else if (right < 3 && owner.CreatureLanes[right] == null)
                             destLane = right;
 
+                        int ownerIdx = isOpp ? opp : ActivePlayerIndex;
+                        vfx?.PlayAtLane(ownerIdx, laneIndex, cardParticle, vfx.candyPushColor);
+
                         if (destLane >= 0)
                         {
-                            int ownerIdx = isOpp ? opp : ActivePlayerIndex;
                             owner.CreatureLanes[laneIndex] = null;
                             owner.CreatureLanes[destLane] = target;
                             target.PlaceInLane(destLane);
                             GameEvents.OnCardPlayed?.Invoke(ownerIdx, destLane, target);
+                            ActionsPanel.Instance?.ShowNotification(
+                                $"¡Candy Push! {target.Data.cardName} movido a Carril {destLane + 1}.");
+                        }
+                        else
+                        {
+                            ActionsPanel.Instance?.ShowNotification(
+                                "Candy Push: no hay espacio adyacente para mover.");
                         }
                     }
                 }
@@ -390,11 +483,19 @@ public class GameManager : MonoBehaviour
             case "Boo To You":
                 if (laneIndex >= 0)
                 {
+                    vfx?.PlayAtLane(opp, laneIndex, cardParticle, vfx.booToYouColor);
                     CardInstance target = OpponentPlayer.CreatureLanes[laneIndex];
                     if (target != null && target.CurrentState == CardState.Flooped)
                     {
                         target.ReadyUp();
+                        ActionsPanel.Instance?.ShowNotification(
+                            $"¡Boo To You! Floop cancelado de {target.Data.cardName}.");
                         Debug.Log("Boo To You: canceló el Floop enemigo.");
+                    }
+                    else
+                    {
+                        ActionsPanel.Instance?.ShowNotification(
+                            "Boo To You: el objetivo no está en Floop.", 2f);
                     }
                 }
                 break;
@@ -405,6 +506,9 @@ public class GameManager : MonoBehaviour
                     CardInstance c = OpponentPlayer.CreatureLanes[i];
                     if (c != null) c.AddAttackBonus(-2);
                 }
+                vfx?.PlayAtLane(opp, 1, cardParticle, vfx.smellColor);
+                ActionsPanel.Instance?.ShowNotification(
+                    "¡Smell! -2 ATK a todas las criaturas enemigas este turno.");
                 break;
         }
     }

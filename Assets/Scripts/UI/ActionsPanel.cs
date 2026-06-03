@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Serialization;
 using TMPro;
+using System.Collections;
 
 public class ActionsPanel : MonoBehaviour
 {
@@ -22,10 +23,10 @@ public class ActionsPanel : MonoBehaviour
     [Header("Instrucciones")]
     [SerializeField] private TMP_Text textInstruction;
 
-    // ── Estado interno ────────────────────────────────────────────────────
     private CardInstance pendingCard;
     private bool expectingLaneSelection;
     private int floopTargetLane = -1;
+    private Coroutine notifRoutine;
 
     private void Awake()
     {
@@ -45,6 +46,62 @@ public class ActionsPanel : MonoBehaviour
         TMP_Text btnText = buttonFloopMain.GetComponentInChildren<TMP_Text>();
         if (btnText != null) btnText.text = "Floop";
 
+        SetInstruction("Selecciona un carril para colocar la carta.");
+
+        GameEvents.OnGameStateChanged += OnGameStateChanged;
+        GameEvents.OnTurnChanged += OnTurnChanged;
+        GameEvents.OnGameOver += OnGameOver;
+    }
+
+    private void OnDestroy()
+    {
+        buttonFight.onClick.RemoveAllListeners();
+        buttonFloopMain.onClick.RemoveAllListeners();
+        buttonPlaySpell.onClick.RemoveAllListeners();
+        buttonCancel.onClick.RemoveAllListeners();
+
+        GameEvents.OnGameStateChanged -= OnGameStateChanged;
+        GameEvents.OnTurnChanged -= OnTurnChanged;
+        GameEvents.OnGameOver -= OnGameOver;
+    }
+
+    private void OnGameStateChanged(GameState state)
+    {
+        switch (state)
+        {
+            case GameState.TurnStart:
+                ShowNotification("¡Nuevo turno! Acciones restauradas.");
+                break;
+            case GameState.Fight:
+                ShowNotification("⚔ ¡Fase de combate!");
+                break;
+            case GameState.GameOver:
+                break;
+        }
+    }
+
+    private void OnTurnChanged(int activePlayerIdx)
+    {
+        ShowNotification($"Turno del Jugador {activePlayerIdx + 1}");
+    }
+
+    private void OnGameOver(int winnerIdx)
+    {
+        ShowNotification($"¡Jugador {winnerIdx + 1} gana la partida!");
+    }
+
+    public void ShowNotification(string message, float duration = 3f)
+    {
+        if (textInstruction == null) return;
+        if (notifRoutine != null) StopCoroutine(notifRoutine);
+        textInstruction.text = message;
+        notifRoutine = StartCoroutine(ClearNotificationAfter(duration));
+    }
+
+    private IEnumerator ClearNotificationAfter(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        notifRoutine = null;
         SetInstruction("Selecciona una carta de tu mano o una criatura del campo.");
     }
 
@@ -64,7 +121,15 @@ public class ActionsPanel : MonoBehaviour
         bool isSpell = card.Data.cardType == CardType.Spell;
         buttonPlaySpell.gameObject.SetActive(isSpell);
 
-        if (isSpell)
+        PlayerState player = GameManager.Instance.ActivePlayer;
+        bool canAfford = player.CanAfford(card.Data.actionCost);
+        bool meetsLandscape = player.MeetsLandscapeRequirement(card.Data);
+
+        if (!canAfford)
+            SetInstruction($"No tienes energía suficiente. Costo: {card.Data.actionCost}, tienes: {player.ActionsRemaining}.");
+        else if (!meetsLandscape)
+            SetInstruction($"Necesitas paisaje '{card.Data.landscapeRequired}'.");
+        else if (isSpell)
             SetInstruction($"Selecciona un carril y escanea la carta para lanzar {card.Data.cardName}.");
         else
             SetInstruction($"Selecciona un carril para colocar {card.Data.cardName}.");
@@ -106,6 +171,15 @@ public class ActionsPanel : MonoBehaviour
                 UpdateActionCount(activePlayer.ActionsRemaining);
                 SetInstruction("Carta jugada.");
             }
+            else if (!activePlayer.CanAfford(pendingCard.Data.actionCost))
+            {
+                SetInstruction($"No tienes energía. Costo: {pendingCard.Data.actionCost}, " +
+                               $"tienes: {activePlayer.ActionsRemaining}.");
+            }
+            else if (!activePlayer.MeetsLandscapeRequirement(pendingCard.Data))
+            {
+                SetInstruction($"Necesitas paisaje '{pendingCard.Data.landscapeRequired}'.");
+            }
             return;
         }
 
@@ -116,19 +190,31 @@ public class ActionsPanel : MonoBehaviour
         if (playerIndex == activeIdx)
         {
             CardInstance creature = activePlayer.CreatureLanes[laneIndex];
-            if (creature != null && creature.CanFloop &&
-                activePlayer.CanAfford(creature.Data.abilityActionCost))
+            if (creature == null)
+            {
+                floopTargetLane = -1;
+                buttonFloopMain.interactable = false;
+                SetInstruction($"No hay criatura en el Carril {laneIndex + 1}.");
+            }
+            else if (creature.CanFloop && activePlayer.CanAfford(creature.Data.abilityActionCost))
             {
                 floopTargetLane = laneIndex;
                 buttonFloopMain.interactable = true;
                 SetInstruction($"Floop disponible en Carril {laneIndex + 1} " +
                                $"(costo: {creature.Data.abilityActionCost}).");
             }
+            else if (!creature.CanFloop)
+            {
+                floopTargetLane = -1;
+                buttonFloopMain.interactable = false;
+                SetInstruction($"{creature.Data.cardName} no puede hacer Floop.");
+            }
             else
             {
                 floopTargetLane = -1;
                 buttonFloopMain.interactable = false;
-                SetInstruction($"Escanea tu carta para el Carril {laneIndex + 1}");
+                SetInstruction($"No tienes energía para hacer Floop. " +
+                               $"Costo: {creature.Data.abilityActionCost}, tienes: {activePlayer.ActionsRemaining}.");
             }
         }
     }
@@ -140,40 +226,73 @@ public class ActionsPanel : MonoBehaviour
         AudioManager.Instance?.PlayButtonClick();
         if (pendingCard == null || pendingCard.Data.cardType != CardType.Spell) return;
 
+        PlayerState p = GameManager.Instance.ActivePlayer;
+
+        if (!p.CanAfford(pendingCard.Data.actionCost))
+        {
+            SetInstruction($"No tienes energía para lanzar este hechizo. " +
+                           $"Costo: {pendingCard.Data.actionCost}, tienes: {p.ActionsRemaining}.");
+            return;
+        }
+
+        if (!p.MeetsLandscapeRequirement(pendingCard.Data))
+        {
+            SetInstruction($"Necesitas paisaje '{pendingCard.Data.landscapeRequired}' " +
+                           $"para lanzar este hechizo.");
+            return;
+        }
+
         bool success = GameManager.Instance.TryPlaySpell(pendingCard);
         if (success)
         {
             HideCardOptions();
-            UpdateActionCount(GameManager.Instance.ActivePlayer.ActionsRemaining);
+            UpdateActionCount(p.ActionsRemaining);
             SetInstruction("¡Hechizo lanzado!");
         }
         else
         {
-            PlayerState p = GameManager.Instance.ActivePlayer;
-            if (!p.MeetsLandscapeRequirement(pendingCard.Data))
-                SetInstruction($"Necesitas paisaje '{pendingCard.Data.landscapeRequired}' " +
-                               $"para lanzar este hechizo.");
-            else
-                SetInstruction("No puedes lanzar este hechizo ahora.");
+            SetInstruction("No puedes lanzar este hechizo ahora.");
         }
     }
 
     private void OnFloopMainPressed()
     {
         AudioManager.Instance?.PlayButtonClick();
-        if (floopTargetLane < 0) return;
+        if (floopTargetLane < 0)
+        {
+            SetInstruction("Selecciona una criatura en el campo para hacer Floop.");
+            return;
+        }
+
+        PlayerState p = GameManager.Instance.ActivePlayer;
+        CardInstance creature = p.CreatureLanes[floopTargetLane];
+        if (creature == null)
+        {
+            SetInstruction("Ya no hay criatura en ese carril.");
+            floopTargetLane = -1;
+            return;
+        }
+
+        if (!p.CanAfford(creature.Data.abilityActionCost))
+        {
+            SetInstruction($"No tienes energía para hacer Floop. " +
+                           $"Costo: {creature.Data.abilityActionCost}, tienes: {p.ActionsRemaining}.");
+            buttonFloopMain.interactable = false;
+            floopTargetLane = -1;
+            return;
+        }
 
         bool success = GameManager.Instance.TryFloop(floopTargetLane);
         if (success)
         {
             buttonFloopMain.interactable = false;
             floopTargetLane = -1;
-            UpdateActionCount(GameManager.Instance.ActivePlayer.ActionsRemaining);
-            SetInstruction("¡Floop activado! La criatura está en modo defensa.");
+            UpdateActionCount(p.ActionsRemaining);
+            SetInstruction($"¡{creature.Data.cardName} activó su Floop!");
         }
         else
         {
-            SetInstruction("No se puede Flopear ahora.");
+            SetInstruction("No se puede hacer Floop en este momento.");
         }
     }
 
@@ -212,13 +331,5 @@ public class ActionsPanel : MonoBehaviour
     {
         if (textInstruction != null)
             textInstruction.text = message;
-    }
-
-    private void OnDestroy()
-    {
-        buttonFight.onClick.RemoveAllListeners();
-        buttonFloopMain.onClick.RemoveAllListeners();
-        buttonPlaySpell.onClick.RemoveAllListeners();
-        buttonCancel.onClick.RemoveAllListeners();
     }
 }

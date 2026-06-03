@@ -26,5 +26,13 @@ MonoBehaviour:
   abilityDescription: Descarta un hechizo del mazo enemigo.
   creaturePrefab: {fileID: 171927380109893388, guid: b8b8b01235231ca4a89101c6fc3840ca, type: 3}
   buildingPrefab: {fileID: 0}
-  floopAnimation: {fileID: -4980162530228075440, guid: e5901ce40e7bc6f45be465c564aa05e0, type: 3}
+  floopAnimation: {fileID: 0}
   spellEffect: {fileID: 0}
+  attackSFX: {fileID: 0}
+  damageSFX: {fileID: 0}
+  floopSFX: {fileID: 0}
+  spellSFX: {fileID: 0}
+  idleAnimation: {fileID: 1656708315764177654, guid: e5901ce40e7bc6f45be465c564aa05e0, type: 3}
+  attackAnimation: {fileID: -6217389266773117732, guid: e5901ce40e7bc6f45be465c564aa05e0, type: 3}
+  damageAnimation: {fileID: 2075726249656104597, guid: e5901ce40e7bc6f45be465c564aa05e0, type: 3}
+  deathAnimation: {fileID: 5248203685024377522, guid: e5901ce40e7bc6f45be465c564aa05e0, type: 3}

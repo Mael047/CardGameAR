@@ -38,4 +38,10 @@ public class CardData : ScriptableObject
     public AudioClip damageSFX;
     public AudioClip floopSFX;
     public AudioClip spellSFX;
+
+    [Header("Animaciones")]
+    public AnimationClip idleAnimation;
+    public AnimationClip attackAnimation;
+    public AnimationClip damageAnimation;
+    public AnimationClip deathAnimation;
 }

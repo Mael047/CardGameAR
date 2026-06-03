@@ -1,7 +1,14 @@
 fileFormatVersion: 2
 guid: dddaff6382c0b4a41a58f9f116b05b8d
+AssetOrigin:
+  serializedVersion: 1
+  productId: 311173
+  packageName: Haon SD Creature Pack
+  packageVersion: 2025.0
+  assetPath: Assets/Haon SD series Pack/Creature/Animation/AnimFbx_Ghost_Damaged.FBX
+  uploadId: 733196
 ModelImporter:
-  serializedVersion: 22200
+  serializedVersion: 24200
   internalIDToNameTable:
   - first:
       1: 100000
@@ -154,7 +161,7 @@ ModelImporter:
       name: anim_Ghost_Damage
       takeName: Take 001
       internalID: 0
-      firstFrame: 10
+      firstFrame: -12
       lastFrame: 22
       wrapMode: 0
       orientationOffsetY: 0
@@ -239,6 +246,9 @@ ModelImporter:
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
     optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
     meshOptimizationFlags: -1
     indexFormat: 1
     secondaryUVAngleDistortion: 8
@@ -276,8 +286,7 @@ ModelImporter:
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
-  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 9ed6d6d6b67851d4694f69ba0dd4c0b6,
-    type: 3}
+  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 9ed6d6d6b67851d4694f69ba0dd4c0b6, type: 3}
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 2
   humanoidOversampling: 1
@@ -289,10 +298,3 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 311173
-  packageName: Haon SD Creature Pack
-  packageVersion: 2025.0
-  assetPath: Assets/Haon SD series Pack/Creature/Animation/AnimFbx_Ghost_Damaged.FBX
-  uploadId: 733196

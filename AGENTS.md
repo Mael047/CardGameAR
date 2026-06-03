@@ -112,6 +112,51 @@ Referencia de eventos de audio:
 | `OnGameOver` | `gameOverSFX` |
 | Botones UI | `buttonClickSFX` via `AudioManager.Instance.PlayButtonClick()` |
 
+## ARCardAnimation — Animaciones por carta
+
+`ARCardAnimation` se añade a cada prefab de criatura/edificio. Se auto-asigna el componente `Animator` (Mecanim) con `GetComponentInChildren<Animator>()`.
+
+**No necesita AnimatorController custom.** En `Setup()` se cambia al `templateController` y se reproduce `Idle`.
+
+Los 4 estados del template deben llamarse exactamente `Idle`, `Attack`, `Damage`, `Death` y los clips se asignan directamente en el `AnimatorController` (no en CardData).
+
+**Disparo desde el gameplay:**
+
+| Momento | Animación |
+|---------|-----------|
+| `ResolveCombat` — atacante | `PlayAttack()` en el carril del atacante |
+| `ResolveCombat` — defensor recibe daño | `PlayDamage()` en el carril del defensor |
+| Criatura destruida en combate | `PlayDeath()` antes de `DestroyCreature` |
+| `Science Blast` sobre criatura | `PlayDamage()` + `PlayDeath()` si muere |
+
+Las animaciones se invocan a través de `ARBoardManager.PlayAttackAnimation(player, lane)`, etc. El `cardAnimations[2,3]` se actualiza automáticamente al colocar o remover cartas.
+
+**Asignación en el Inspector:**
+1. Crea un `AnimatorController` con 4 estados: `Idle`, `Attack`, `Damage`, `Death`
+2. En cada estado, arrastra el clip de animación correspondiente en el campo **Motion**
+3. En el estado `Damage` y `Death`, en el Inspector desmarca **Loop Time** (para que se reproduzcan una sola vez)
+4. En el prefab, en `ARCardAnimation`:
+   - Arrastra el controller al campo `templateController`
+   - Arrastra los mismos clips a `clipAttack`, `clipDamage`, `clipDeath` (para el timing automático)
+5. Las animaciones se asignan directamente en el `AnimatorController` del prefab — el `CardData` solo referencia el prefab
+6. Agrega transiciones de `Attack` y `Damage` hacia `Idle` con `Has Exit Time = true`, `Exit Time = 1` y `Transition Duration = 0.15` para blends suaves
+
+## SpellVFX — Efectos visuales de hechizos
+
+`SpellVFX : MonoBehaviour` (singleton). Crea un GameObject `"SpellVFX"` en la escena.
+
+- Prioridad 1: usa el `ParticleSystem` asignado en `CardData.spellEffect` (único por hechizo), se instancia en el carril del oponente
+- Prioridad 2: `globalSpellEffect` (fallback global en SpellVFX), se tiñe con el color del hechizo
+- Sin prefab: placeholder automático (esfera expandible con color)
+- Colores por hechizo configurables en el Inspector de SpellVFX
+- Llamado desde `GameManager.ResolveSpellEffect()` vía `SpellVFX.Instance.PlayAtLane()`
+
+### Asignar efectos por hechizo
+
+1. Crea un GameObject con `ParticleSystem` como prefab (ej: `Assets/Prefabs/Effects/ScienceBlastVFX.prefab`)
+2. Arrástralo al campo `spellEffect` del `CardData` correspondiente en el Inspector
+3. El efecto se instancia automáticamente en el carril enemigo al lanzar el hechizo
+
 ## Known issues
 
 - Build scene list only contains a props demo scene — AR scenes are not included

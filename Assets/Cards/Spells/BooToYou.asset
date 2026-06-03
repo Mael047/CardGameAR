@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BooToYou
   m_EditorClassIdentifier: Assembly-CSharp::CardData
   cardName: Boo To You
-  qrID: QR_S01
+  qrID: QR_S03
   cardArtwork: {fileID: 0}
   cardType: 2
   actionCost: 1
@@ -28,3 +28,7 @@ MonoBehaviour:
   buildingPrefab: {fileID: 0}
   floopAnimation: {fileID: 0}
   spellEffect: {fileID: 0}
+  attackSFX: {fileID: 0}
+  damageSFX: {fileID: 0}
+  floopSFX: {fileID: 0}
+  spellSFX: {fileID: 0}
