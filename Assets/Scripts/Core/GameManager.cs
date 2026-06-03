@@ -334,7 +334,8 @@ public class GameManager : MonoBehaviour
     // ── Habilidades ───────────────────────────────────────────────────────
     private void ApplyOnEnterPassives(CardInstance card, int laneIndex)
     {
-        // (reservado para pasivas de entrada)
+        if (ActivePlayer.BuildingLanes[laneIndex]?.Data.cardName == "Tiny Crypt")
+            card.AddDefenseBonus(1);
     }
 
     private void ApplyBuildingPassive(CardInstance building, int laneIndex)
@@ -527,14 +528,20 @@ public class GameManager : MonoBehaviour
             }
 
             CardInstance building = ActivePlayer.BuildingLanes[i];
-            if (building != null && building.Data.cardName == "Candy Lab")
+            if (building != null)
             {
-                CardInstance enemy = OpponentPlayer.CreatureLanes[i];
-                if (enemy == null || enemy.CurrentState != CardState.Ready)
+                if (building.Data.cardName == "Candy Lab")
                 {
-                    CardInstance drawn = ActivePlayer.DrawCard();
-                    if (drawn != null) GameEvents.OnCardDrawn?.Invoke(ActivePlayerIndex, drawn);
+                    CardInstance enemy = OpponentPlayer.CreatureLanes[i];
+                    if (enemy == null || enemy.CurrentState != CardState.Ready)
+                    {
+                        CardInstance drawn = ActivePlayer.DrawCard();
+                        if (drawn != null) GameEvents.OnCardDrawn?.Invoke(ActivePlayerIndex, drawn);
+                    }
                 }
+
+                if (building.Data.cardName == "Tiny Crypt" && creature != null)
+                    creature.AddDefenseBonus(1);
             }
         }
     }
