@@ -9622,11 +9622,11 @@ MonoBehaviour:
     Path: event:/Musica
   turnChangeSFX:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: -1834765630
+      Data2: 1281543339
+      Data3: -779237497
+      Data4: 1712637141
+    Path: event:/Interfaz/Turn
   buttonClickSFX:
     Guid:
       Data1: 396782453
@@ -9636,11 +9636,11 @@ MonoBehaviour:
     Path: event:/Interfaz/Click
   fightSFX:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: 1990690619
+      Data2: 1263877801
+      Data3: 1549330082
+      Data4: -1926840491
+    Path: event:/Interfaz/Fight
   gameOverSFX:
     Guid:
       Data1: 294994546
