@@ -28,10 +28,34 @@ MonoBehaviour:
   buildingPrefab: {fileID: 0}
   floopAnimation: {fileID: 0}
   spellEffect: {fileID: 0}
-  attackSFX: {fileID: 0}
-  damageSFX: {fileID: 0}
-  floopSFX: {fileID: 0}
-  spellSFX: {fileID: 0}
+  attackSFX:
+    Guid:
+      Data1: 1997585728
+      Data2: 1088107515
+      Data3: -1439451222
+      Data4: 355063889
+    Path: event:/ATK/A_Skeletal
+  damageSFX:
+    Guid:
+      Data1: -1350269015
+      Data2: 1082842163
+      Data3: 203237765
+      Data4: -1799580233
+    Path: event:/DMG/D_Ghosty
+  floopSFX:
+    Guid:
+      Data1: -457647467
+      Data2: 1256460567
+      Data3: 386286999
+      Data4: 2072851143
+    Path: event:/Floop/Floop_Skeletal
+  spellSFX:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
   idleAnimation: {fileID: 1656708315764177654, guid: e5901ce40e7bc6f45be465c564aa05e0, type: 3}
   attackAnimation: {fileID: -6217389266773117732, guid: e5901ce40e7bc6f45be465c564aa05e0, type: 3}
   damageAnimation: {fileID: 2075726249656104597, guid: e5901ce40e7bc6f45be465c564aa05e0, type: 3}

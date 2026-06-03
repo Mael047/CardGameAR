@@ -28,3 +28,35 @@ MonoBehaviour:
   buildingPrefab: {fileID: 0}
   floopAnimation: {fileID: 2277792357321143191, guid: d7061d2ec501adb4da1e842bf1f2be57, type: 3}
   spellEffect: {fileID: 0}
+  attackSFX:
+    Guid:
+      Data1: -738245225
+      Data2: 1256511496
+      Data3: 1931807382
+      Data4: 2055407519
+    Path: event:/ATK/A_Cat
+  damageSFX:
+    Guid:
+      Data1: 946208812
+      Data2: 1183327789
+      Data3: -2083589699
+      Data4: 879089180
+    Path: event:/DMG/D_Cat
+  floopSFX:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  spellSFX:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  idleAnimation: {fileID: 0}
+  attackAnimation: {fileID: 0}
+  damageAnimation: {fileID: 0}
+  deathAnimation: {fileID: 0}

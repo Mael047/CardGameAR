@@ -28,10 +28,34 @@ MonoBehaviour:
   buildingPrefab: {fileID: 0}
   floopAnimation: {fileID: 7400000, guid: 3aa072121bfc60b4f8f1bc94f6756e3c, type: 3}
   spellEffect: {fileID: 0}
-  attackSFX: {fileID: 0}
-  damageSFX: {fileID: 0}
-  floopSFX: {fileID: 0}
-  spellSFX: {fileID: 0}
+  attackSFX:
+    Guid:
+      Data1: 1677546014
+      Data2: 1327397384
+      Data3: -738765683
+      Data4: 1333033854
+    Path: event:/ATK/A_Sugar
+  damageSFX:
+    Guid:
+      Data1: -1182920211
+      Data2: 1331501229
+      Data3: -311216760
+      Data4: -1150447717
+    Path: event:/DMG/D_Sugar
+  floopSFX:
+    Guid:
+      Data1: -1767645852
+      Data2: 1075920263
+      Data3: 1636414891
+      Data4: -348366960
+    Path: event:/Floop/Floop_SugarGolem
+  spellSFX:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
   idleAnimation: {fileID: 7400000, guid: 54948340193221b4aa8e859e77a0d367, type: 3}
   attackAnimation: {fileID: 7400000, guid: c079a833bce9f244197c6d6a59349939, type: 3}
   damageAnimation: {fileID: 7400000, guid: 5aadc29268b688b4bbfa27a9979d6e03, type: 3}
