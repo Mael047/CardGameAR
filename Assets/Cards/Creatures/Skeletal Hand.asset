@@ -37,11 +37,11 @@ MonoBehaviour:
     Path: event:/ATK/A_Skeletal
   damageSFX:
     Guid:
-      Data1: -1350269015
-      Data2: 1082842163
-      Data3: 203237765
-      Data4: -1799580233
-    Path: event:/DMG/D_Ghosty
+      Data1: -985856696
+      Data2: 1211435809
+      Data3: 1231110554
+      Data4: -1647418755
+    Path: event:/DMG/D_Skeletal
   floopSFX:
     Guid:
       Data1: -457647467
