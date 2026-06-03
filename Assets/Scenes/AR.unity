@@ -12927,14 +12927,14 @@ MonoBehaviour:
   PreviewVisible: 1
   RuntimeOcclusion: 0
   RuntimeCollider: 0
-  mTrackableName: tablero
+  mTrackableName: tablerofinal
   mInitializedInEditor: 1
   mDataSetPath: 
-  mAspectRatio: 0.7728864
+  mAspectRatio: 0.7729492
   mImageTargetType: 3
-  mWidth: 0.29
-  mHeight: 0.22413705
-  mRuntimeTexture: {fileID: 2800000, guid: c1f8ae9400562c44ba08ab127e257820, type: 3}
+  mWidth: 0.2
+  mHeight: 0.15458985
+  mRuntimeTexture: {fileID: 2800000, guid: ed38dbd89fade4205bfa20aa77eee893, type: 3}
   mMotionHint: 1
   mTrackingOptimization: 0
   mTrackingOptimizationNeedsUpgrade: 0
@@ -13050,7 +13050,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Vuforia.Unity.Engine.dll::Vuforia.ImageTargetPreview
   mObserverBehaviour: {fileID: 1927119511}
   mHiddenRoot: {fileID: 0}
-  mTargetName: tablero
+  mTargetName: tablerofinal
   mDatasetName: 
   mCastedBehaviour: {fileID: 1927119511}
   mMeshFilter: {fileID: 0}
