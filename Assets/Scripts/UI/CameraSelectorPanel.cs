@@ -44,7 +44,6 @@ public class CameraSelectorPanel : MonoBehaviour
     {
         StopPreview();
         panelRoot.SetActive(false);
-        onClose?.Invoke();
     }
 
     private void RefreshCameraList()
@@ -102,12 +101,23 @@ public class CameraSelectorPanel : MonoBehaviour
 
         StopPreview();
 
-        string deviceName = webcamDevices[index].name;
-        activeWebCam = new WebCamTexture(deviceName);
-        cameraPreview.texture = activeWebCam;
-        activeWebCam.Play();
+        try
+        {
+            string deviceName = webcamDevices[index].name;
+            activeWebCam = new WebCamTexture(deviceName);
+            cameraPreview.texture = activeWebCam;
+            activeWebCam.Play();
+            SetStatus($"Probando: {deviceName}...", Color.white);
+        }
+        catch (System.Exception e)
+        {
+            SetStatus($"Error al abrir cámara: {e.Message}", Color.red);
+        }
+    }
 
-        SetStatus($"Probando: {deviceName}...", Color.white);
+    public void StopAnyPreview()
+    {
+        StopPreview();
     }
 
     private void StopPreview()
@@ -116,7 +126,7 @@ public class CameraSelectorPanel : MonoBehaviour
         {
             if (activeWebCam.isPlaying)
                 activeWebCam.Stop();
-            Destroy(activeWebCam);
+            DestroyImmediate(activeWebCam);
             activeWebCam = null;
         }
         cameraPreview.texture = null;

@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class GameManager : MonoBehaviour
 {
@@ -36,10 +37,28 @@ public class GameManager : MonoBehaviour
         TurnNumber = 1;
         isFirstTurn = true;
 
+        DeckData d1 = deckPlayer1;
+        DeckData d2 = deckPlayer2;
+
+        if (d1 == null || d2 == null)
+        {
+            var decks = Resources.FindObjectsOfTypeAll<DeckData>();
+            if (decks != null && decks.Length >= 2)
+            {
+                d1 = decks[0];
+                d2 = decks[1];
+                Debug.Log($"GameManager: decks cargados desde Resources ({decks.Length} encontrados)");
+            }
+            else
+            {
+                Debug.LogError($"GameManager: no hay DeckData disponibles (serializados: {deckPlayer1!=null}/{deckPlayer2!=null}, Resources: {decks?.Length})");
+            }
+        }
+
         Players = new PlayerState[2]
         {
-            new PlayerState("Player 1", deckPlayer1),
-            new PlayerState("Player 2", deckPlayer2)
+            new PlayerState("Player 1", d1),
+            new PlayerState("Player 2", d2)
         };
 
         ActivePlayerIndex = Random.Range(0, 2);

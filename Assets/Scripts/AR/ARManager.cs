@@ -31,20 +31,81 @@ public class ARManager : MonoBehaviour
         string savedCam = PlayerPrefs.GetString("SelectedCameraName", "");
         if (!string.IsNullOrEmpty(savedCam))
         {
-            VuforiaConfiguration.Instance.WebCam.DeviceNameSetInEditor = savedCam;
-            Debug.Log($"ARManager: cámara seleccionada en menú: '{savedCam}'");
+            string disponibles = "";
+            foreach (var d in WebCamTexture.devices)
+                disponibles += $"  '{d.name}'\n";
+
+            bool camExiste = false;
+            foreach (var d in WebCamTexture.devices)
+            {
+                if (d.name == savedCam) { camExiste = true; break; }
+            }
+
+            if (camExiste)
+            {
+                VuforiaConfiguration.Instance.WebCam.DeviceNameSetInEditor = savedCam;
+                Debug.Log($"ARManager: cámara '{savedCam}' encontrada, aplicada a Vuforia\nCámaras disponibles:\n{disponibles}");
+            }
+            else
+            {
+                Debug.LogWarning($"ARManager: cámara '{savedCam}' NO encontrada entre las disponibles:\n{disponibles}Se usará la camera default de Vuforia");
+            }
+        }
+        else
+        {
+            Debug.Log("ARManager: no hay cámara guardada en PlayerPrefs, se usará la default de Vuforia");
+        }
+
+        Debug.Log($"ARManager: ¿Vuforia ya inicializado? {VuforiaApplication.Instance.IsInitialized}");
+    }
+
+    private void Start()
+    {
+        StartCoroutine(EnsureCorrectCamera());
+    }
+
+    private IEnumerator EnsureCorrectCamera()
+    {
+        string savedCam = PlayerPrefs.GetString("SelectedCameraName", "");
+        if (string.IsNullOrEmpty(savedCam)) yield break;
+
+        float timeout = 10f;
+        while (!VuforiaApplication.Instance.IsInitialized && timeout > 0)
+        {
+            timeout -= Time.deltaTime;
+            yield return null;
+        }
+
+        if (!VuforiaApplication.Instance.IsInitialized)
+        {
+            Debug.LogError("ARManager: Vuforia no inicializó");
+            yield break;
+        }
+
+        VuforiaConfiguration.Instance.WebCam.DeviceNameSetInEditor = savedCam;
+        Debug.Log($"ARManager: reiniciando Vuforia con cámara '{savedCam}'");
+        VuforiaApplication.Instance.Deinit();
+
+        float wait = 2f;
+        while (VuforiaApplication.Instance.IsInitialized && wait > 0)
+        {
+            wait -= Time.deltaTime;
+            yield return null;
+        }
+
+        VuforiaApplication.Instance.Initialize();
+
+        timeout = 5f;
+        while (!VuforiaApplication.Instance.IsInitialized && timeout > 0)
+        {
+            timeout -= Time.deltaTime;
+            yield return null;
         }
 
         if (VuforiaApplication.Instance.IsInitialized)
-            StartCoroutine(ReinitAfterCameraChange());
-    }
-
-    private IEnumerator ReinitAfterCameraChange()
-    {
-        Debug.Log("ARManager: reiniciando Vuforia para aplicar cámara");
-        VuforiaApplication.Instance.Deinit();
-        yield return null;
-        VuforiaApplication.Instance.Initialize();
+            Debug.Log($"ARManager: Vuforia reiniciado con cámara '{savedCam}'");
+        else
+            Debug.LogError("ARManager: Vuforia no pudo reiniciarse");
     }
 
     private void OnEnable()
@@ -69,34 +130,51 @@ public class ARManager : MonoBehaviour
     {
         cardDataCache.Clear();
 
-        if (allCards == null || allCards.Length == 0)
+        if (allCards != null)
         {
-            Debug.LogWarning("ARManager: el array 'All Cards' está vacío. " +
-                             "Arrastra todos los CardData assets al Inspector.");
+            foreach (CardData card in allCards)
+            {
+                if (card == null) continue;
+                TryRegisterCard(card);
+            }
+            if (cardDataCache.Count > 0)
+            {
+                Debug.Log($"ARManager: caché construida con {cardDataCache.Count} cartas desde Inspector");
+                return;
+            }
+        }
+
+        // Fallback para builds: buscar CardData cargados por dependencias (DeckData -> CardData)
+        var found = Resources.FindObjectsOfTypeAll<CardData>();
+        if (found != null && found.Length > 0)
+        {
+            foreach (CardData card in found)
+            {
+                if (card == null) continue;
+                TryRegisterCard(card);
+            }
+            Debug.Log($"ARManager: caché construida con {cardDataCache.Count} cartas vía FindObjectsOfTypeAll");
             return;
         }
 
-        foreach (CardData card in allCards)
+        Debug.LogWarning("ARManager: no se encontraron CardData. " +
+                         "Asegúrate de que los assets estén en Resources o asignados en el Inspector.");
+    }
+
+    private void TryRegisterCard(CardData card)
+    {
+        if (string.IsNullOrEmpty(card.qrID))
         {
-            if (card == null) continue;
-
-            if (string.IsNullOrEmpty(card.qrID))
-            {
-                Debug.LogWarning($"ARManager: {card.cardName} no tiene QR ID asignado.");
-                continue;
-            }
-
-            if (cardDataCache.ContainsKey(card.qrID))
-            {
-                Debug.LogWarning($"ARManager: QR ID duplicado '{card.qrID}' " +
-                                 $"en {card.cardName}. Se ignorará.");
-                continue;
-            }
-
-            cardDataCache[card.qrID] = card;
+            Debug.LogWarning($"ARManager: {card.cardName} no tiene QR ID asignado.");
+            return;
         }
-
-        Debug.Log($"ARManager: caché construida con {cardDataCache.Count} cartas.");
+        if (cardDataCache.ContainsKey(card.qrID))
+        {
+            Debug.LogWarning($"ARManager: QR ID duplicado '{card.qrID}' en {card.cardName}. Se ignorará.");
+            return;
+        }
+        cardDataCache[card.qrID] = card;
+        Debug.Log($"ARManager: registrada carta '{card.cardName}' con QR '{card.qrID}'");
     }
 
 
