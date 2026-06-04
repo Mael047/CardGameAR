@@ -74,7 +74,6 @@ public class ARPlacementManager : MonoBehaviour
             Debug.LogWarning($"AR: No se pudo jugar {cardInHand.Data.cardName} en carril {waitingLaneIndex}.");
             ActionsPanel.Instance?.ShowNotification(
                 $"No se puede colocar {cardInHand.Data.cardName} en el carril {waitingLaneIndex + 1}.");
-            waitingLaneIndex = -1;
         }
 
         return success;
