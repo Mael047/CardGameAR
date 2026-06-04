@@ -44,6 +44,7 @@ public class CameraSelectorPanel : MonoBehaviour
     {
         StopPreview();
         panelRoot.SetActive(false);
+        onClose?.Invoke();
     }
 
     private void RefreshCameraList()
