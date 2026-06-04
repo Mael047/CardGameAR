@@ -1,35 +1,69 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class GameOverPanel : MonoBehaviour
 {
-    [SerializeField] private TMP_Text textWinner;
-    [SerializeField] private Button buttonRestart;
+    [SerializeField] private Image displayImage;
+    [SerializeField] private Sprite spritePlayer1Win;
+    [SerializeField] private Sprite spritePlayer2Win;
+    [SerializeField] private CanvasGroup canvasGroup;
+    [SerializeField] private string menuSceneName = "Menu";
 
-    private void Start()
+    [Header("Timing")]
+    [SerializeField] private float fadeInDuration = 0.5f;
+    [SerializeField] private float displayDuration = 4f;
+    [SerializeField] private float fadeOutDuration = 0.5f;
+
+    private Coroutine showRoutine;
+
+    private void Awake()
     {
-        buttonRestart.onClick.AddListener(RestartGame);
-        gameObject.SetActive(false);
+        if (canvasGroup == null)
+            canvasGroup = GetComponent<CanvasGroup>();
     }
-
 
     public void Show(int winnerIndex)
     {
         gameObject.SetActive(true);
-        string winnerName = GameManager.Instance.Players[winnerIndex].PlayerName;
-        textWinner.text = winnerName;
+        canvasGroup.alpha = 0f;
+
+        if (displayImage != null)
+            displayImage.sprite = winnerIndex == 0 ? spritePlayer1Win : spritePlayer2Win;
+
+        showRoutine = StartCoroutine(ShowSequence());
     }
 
-    public void RestartGame()
+    private IEnumerator ShowSequence()
     {
+        float elapsed = 0f;
+        while (elapsed < fadeInDuration)
+        {
+            elapsed += Time.deltaTime;
+            canvasGroup.alpha = Mathf.Clamp01(elapsed / fadeInDuration);
+            yield return null;
+        }
+        canvasGroup.alpha = 1f;
+
+        yield return new WaitForSeconds(displayDuration);
+
+        elapsed = 0f;
+        while (elapsed < fadeOutDuration)
+        {
+            elapsed += Time.deltaTime;
+            canvasGroup.alpha = Mathf.Clamp01(1f - elapsed / fadeOutDuration);
+            yield return null;
+        }
+        canvasGroup.alpha = 0f;
+
         AudioManager.Instance?.PlayButtonClick();
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        SceneManager.LoadScene(menuSceneName);
     }
 
     private void OnDestroy()
     {
-        buttonRestart.onClick.RemoveAllListeners();
+        if (showRoutine != null)
+            StopCoroutine(showRoutine);
     }
 }

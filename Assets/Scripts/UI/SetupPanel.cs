@@ -191,11 +191,21 @@ public class SetupPanel : MonoBehaviour
             int count = kvp.Value;
 
             Button newBtn = Instantiate(landscapeButtonPrefab, landscapeButtonContainer);
+
             TMP_Text btnText = newBtn.GetComponentInChildren<TMP_Text>();
             if (btnText != null)
                 btnText.text = $"{capturedType} (x{count})";
-            else
-                Debug.LogWarning($"SetupPanel: el prefab no tiene TMP_Text child para {capturedType}");
+
+            Image btnImage = newBtn.GetComponent<Image>();
+            if (btnImage == null)
+                btnImage = newBtn.GetComponentInChildren<Image>();
+            if (btnImage != null)
+            {
+                Sprite sprite = GetLandscapeSprite(capturedType);
+                btnImage.sprite = sprite;
+                if (sprite != null)
+                    btnImage.color = Color.white;
+            }
 
             newBtn.onClick.AddListener(() => OnLandscapeSelected(capturedType));
             spawnedLandscapeButtons.Add(newBtn);
