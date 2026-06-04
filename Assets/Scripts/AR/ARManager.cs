@@ -28,6 +28,7 @@ public class ARManager : MonoBehaviour
 
         BuildCardDataCache();
 
+#if UNITY_EDITOR
         string savedCam = PlayerPrefs.GetString("SelectedCameraName", "");
         if (!string.IsNullOrEmpty(savedCam))
         {
@@ -55,6 +56,7 @@ public class ARManager : MonoBehaviour
         {
             Debug.Log("ARManager: no hay cámara guardada en PlayerPrefs, se usará la default de Vuforia");
         }
+#endif
 
         Debug.Log($"ARManager: ¿Vuforia ya inicializado? {VuforiaApplication.Instance.IsInitialized}");
     }
@@ -66,6 +68,7 @@ public class ARManager : MonoBehaviour
 
     private IEnumerator EnsureCorrectCamera()
     {
+#if UNITY_EDITOR
         string savedCam = PlayerPrefs.GetString("SelectedCameraName", "");
         if (string.IsNullOrEmpty(savedCam)) yield break;
 
@@ -106,6 +109,9 @@ public class ARManager : MonoBehaviour
             Debug.Log($"ARManager: Vuforia reiniciado con cámara '{savedCam}'");
         else
             Debug.LogError("ARManager: Vuforia no pudo reiniciarse");
+#else
+        yield break;
+#endif
     }
 
     private void OnEnable()

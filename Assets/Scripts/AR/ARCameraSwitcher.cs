@@ -45,6 +45,7 @@ public class ARCameraSwitcher : MonoBehaviour
 
     public void CycleCamera()
     {
+#if UNITY_EDITOR
         if (isSwitching || devices == null || devices.Length == 0)
         {
             RefreshDevices();
@@ -57,8 +58,12 @@ public class ARCameraSwitcher : MonoBehaviour
         PlayerPrefs.Save();
 
         StartCoroutine(SwitchCamera(camName));
+#else
+        SetStatus("Cambio de cámara solo disponible en Editor");
+#endif
     }
 
+#if UNITY_EDITOR
     private IEnumerator SwitchCamera(string camName)
     {
         isSwitching = true;
@@ -84,6 +89,7 @@ public class ARCameraSwitcher : MonoBehaviour
         string icon = VuforiaApplication.Instance.IsInitialized ? "✓" : "✗";
         SetStatus($"{icon} {camName}");
     }
+#endif
 
     private void SetStatus(string msg)
     {

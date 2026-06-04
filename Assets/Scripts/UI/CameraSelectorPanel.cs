@@ -44,7 +44,6 @@ public class CameraSelectorPanel : MonoBehaviour
     {
         StopPreview();
         panelRoot.SetActive(false);
-        onClose?.Invoke();
     }
 
     private void RefreshCameraList()
@@ -146,7 +145,9 @@ public class CameraSelectorPanel : MonoBehaviour
         PlayerPrefs.SetString("SelectedCameraName", selectedCameraName);
         PlayerPrefs.Save();
 
+#if UNITY_EDITOR
         VuforiaConfiguration.Instance.WebCam.DeviceNameSetInEditor = selectedCameraName;
+#endif
 
         StopPreview();
         SetStatus($"Cámara guardada: {selectedCameraName}", Color.green);

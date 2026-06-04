@@ -1,0 +1,13 @@
+{
+  "MonoBehaviour": {
+    "Version": 5,
+    "EnableBurstCompilation": false,
+    "EnableOptimisations": false,
+    "EnableSafetyChecks": false,
+    "EnableDebugInAllBuilds": false,
+    "DebugDataKind": 1,
+    "CpuTargetsX32": 3,
+    "CpuTargetsX64": 9,
+    "OptimizeFor": 0
+  }
+}
