@@ -157,11 +157,29 @@ Las animaciones se invocan a través de `ARBoardManager.PlayAttackAnimation(play
 2. Arrástralo al campo `spellEffect` del `CardData` correspondiente en el Inspector
 3. El efecto se instancia automáticamente en el carril enemigo al lanzar el hechizo
 
-## Known issues
+## State — final de la sesión (4 jun 2026)
 
-- Build scene list only contains a props demo scene — AR scenes are not included
-- `EditorBuildSettings.asset` has `m_UseUCBPForAssetBundles: 0`
-- No automated tests exist
+### Completado en código
+- **Fase 1–5**: Todas las habilidades, audio, animaciones, VFX, notificaciones, mensajes de instrucción
+- **Flujo AR placement**: `waitingLaneIndex` se resetea SOLO en éxito (no en fallo)
+- **GameOverPanel**: fade in/out con imagen del ganador, carga `Menu.unity`
+- **TurnChangePanel**: overlay con fade corto, sprite por jugador
+- **SetupPanel**: botones de paisaje muestran sprite + texto, `HorizontalLayoutGroup`
+- **CameraSelectorPanel** (Menu): dropdown + preview live, guarda en PlayerPrefs + VuforiaConfiguration
+- **ARCameraSwitcher** (AR): botón flotante 📷 que cicla entre cámaras vía Deinit/Init de Vuforia
+- **Menu.CloseCameraPanel()**: añadido (bloqueante resuelto)
+
+### Pendiente — solo en Editor (Inspector/scene)
+| Tarea | Dónde | Prioridad |
+|---|---|---|
+| Añadir `ARCardVisual` a Punchy y SugarGolem prefabs (no tienen indicadores ni StatsCanvas) | `Assets/Prefabs/AR/Criaturas/Punchy.prefab`, `SugarGolem.prefab` | **HIGH** |
+| Crear prefab de paisaje Rainbow | `Assets/Prefabs/Lands/` | **HIGH** |
+| ARBoardManager: entry [4] cambiar type a Rainbow y asignar prefab | BoardRootImageTarget > ARBoardManager | **HIGH** |
+| Asignar `cardArtwork` (sprite) a los 12 CardData | `Assets/Cards/{Creatures,Builds,Spells}/` | MEDIUM |
+| Asignar `globalSpellEffect` (ParticleSystem prefab) en SpellVFX | GameObject SpellVFX en AR.unity | MEDIUM |
+| Asignar `laneBackground` (Image) en los 6 LaneUI | AR.unity > Lane_P{1,2}_{0,1,2} | MEDIUM |
+| Poner ARCameraSwitcher en algún GameObject de AR.unity | Escena AR | LOW |
+| Verificar que SwampLurker no use Idle como Death | `Slime.controller` > estado Death | LOW |
 
 ## Assets
 

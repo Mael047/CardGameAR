@@ -1,6 +1,9 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
+using Vuforia;
 
+[DefaultExecutionOrder(-500)]
 public class ARManager : MonoBehaviour
 {
     public static ARManager Instance { get; private set; }
@@ -24,6 +27,24 @@ public class ARManager : MonoBehaviour
         Instance = this;
 
         BuildCardDataCache();
+
+        string savedCam = PlayerPrefs.GetString("SelectedCameraName", "");
+        if (!string.IsNullOrEmpty(savedCam))
+        {
+            VuforiaConfiguration.Instance.WebCam.DeviceNameSetInEditor = savedCam;
+            Debug.Log($"ARManager: cámara seleccionada en menú: '{savedCam}'");
+        }
+
+        if (VuforiaApplication.Instance.IsInitialized)
+            StartCoroutine(ReinitAfterCameraChange());
+    }
+
+    private IEnumerator ReinitAfterCameraChange()
+    {
+        Debug.Log("ARManager: reiniciando Vuforia para aplicar cámara");
+        VuforiaApplication.Instance.Deinit();
+        yield return null;
+        VuforiaApplication.Instance.Initialize();
     }
 
     private void OnEnable()
