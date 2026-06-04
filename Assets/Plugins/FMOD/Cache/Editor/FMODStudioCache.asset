@@ -15,7 +15,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/Interfaz.bank
   Name: Interfaz
   StudioPath: bank:/Interfaz
-  lastModified: 639161217820202424
+  lastModified: 639161127197300453
   FileSizes: []
   Exists: 1
 --- !u!114 &-8933919401150176464
@@ -33,7 +33,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/ATK.bank
   Name: ATK
   StudioPath: bank:/ATK
-  lastModified: 639161217819869799
+  lastModified: 639161127197250167
   FileSizes: []
   Exists: 1
 --- !u!114 &-8468530909933066616
@@ -375,7 +375,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/Hechizos.bank
   Name: Hechizos
   StudioPath: bank:/Hechizos
-  lastModified: 639161217820116744
+  lastModified: 639161127197250167
   FileSizes: []
   Exists: 1
 --- !u!114 &-38417764075348701
@@ -393,7 +393,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 639161217820308790
+  lastModified: 639161127197300453
   FileSizes:
   - Name: 
     Value: 2028
@@ -451,7 +451,7 @@ MonoBehaviour:
   StringsBanks:
   - {fileID: -38417764075348701}
   cacheVersion: 131859
-  cacheTime: 639161217820636426
+  cacheTime: 639161127197522432
   SerializableEventsDict:
   - key: event:/ATK/A_Sugar
     index: 0
@@ -599,7 +599,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 639161217820253572
+  lastModified: 639161127197300453
   FileSizes: []
   Exists: 1
 --- !u!114 &2679859711407423982
@@ -698,7 +698,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/Musica.bank
   Name: Musica
   StudioPath: bank:/Musica
-  lastModified: 639161217820636426
+  lastModified: 639161127197522432
   FileSizes: []
   Exists: 1
 --- !u!114 &4355002718323162500
@@ -716,7 +716,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/DMG.bank
   Name: DMG
   StudioPath: bank:/DMG
-  lastModified: 639161217819928776
+  lastModified: 639161127197250167
   FileSizes: []
   Exists: 1
 --- !u!114 &4714162385731822982
@@ -815,7 +815,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/Floop.bank
   Name: Floop
   StudioPath: bank:/Floop
-  lastModified: 639161217820015437
+  lastModified: 639161127197250167
   FileSizes: []
   Exists: 1
 --- !u!114 &5998777597835975492

@@ -18,7 +18,7 @@ public class GameInfoPanel : MonoBehaviour
     public void UpdateHp(int playerIndex, int newHP)
     {
         TMP_Text target = playerIndex == 0 ? textHP_P1 : textHP_P2;
-        target.text = $"{PlayerState.MAX_HP}";
+        target.text = $"{newHP}";
 
         if (newHP > 10) target.color = Color.green;
         else if (newHP > 5) target.color = Color.yellow;
