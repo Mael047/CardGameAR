@@ -178,7 +178,14 @@ public class ActionsPanel : MonoBehaviour
             }
             else if (!activePlayer.MeetsLandscapeRequirement(pendingCard.Data))
             {
-                SetInstruction($"Necesitas paisaje '{pendingCard.Data.landscapeRequired}'.");
+                SetInstruction($"Necesitas paisaje '{pendingCard.Data.landscapeRequired}' " +
+                               $"en tu tablero.");
+            }
+            else if (!GameManager.Instance.LaneMatchesLandscape(laneIndex, pendingCard.Data))
+            {
+                LandscapeType laneLandscape = activePlayer.Landscapes[laneIndex];
+                SetInstruction($"Este carril es {laneLandscape}, pero " +
+                               $"{pendingCard.Data.cardName} requiere {pendingCard.Data.landscapeRequired}.");
             }
             return;
         }

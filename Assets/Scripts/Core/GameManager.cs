@@ -169,7 +169,7 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
-    private bool LaneMatchesLandscape(int laneIndex, CardData cardData)
+    public bool LaneMatchesLandscape(int laneIndex, CardData cardData)
     {
         if (cardData.landscapeRequired == LandscapeType.Rainbow) return true;
         return ActivePlayer.Landscapes[laneIndex] == cardData.landscapeRequired;
