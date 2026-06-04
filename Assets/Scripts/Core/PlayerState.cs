@@ -113,11 +113,12 @@ public class PlayerState
     {
         if (card.landscapeRequired == LandscapeType.Rainbow) return true;
 
+        int effectiveAmount = Mathf.Max(1, card.landscapeAmount);
         int count = 0;
         foreach (LandscapeType l in Landscapes)
             if (l == card.landscapeRequired) count++;
 
-        return count >= card.landscapeAmount;
+        return count >= effectiveAmount;
     }
 
     public CardInstance PlaceCreature(CardInstance creature, int laneIndex)

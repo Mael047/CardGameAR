@@ -21,4 +21,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: cdb973429f2e8e846929fe8f7de5b2a3, type: 2}
   - {fileID: 11400000, guid: e3ae90ea016cef64d897063c894a4390, type: 2}
   - {fileID: 11400000, guid: ac8849aab1e53c44ca80ce2649cb6c4f, type: 2}
+  - {fileID: 11400000, guid: 5a66502960661ee44b8a09e35e0e3e5a, type: 2}
+  - {fileID: 11400000, guid: 784b6209c7f042a4cbcb5d99fe56cc25, type: 2}
+  - {fileID: 11400000, guid: af1d8324ecb96f244a5bc5559e34f39a, type: 2}
+  - {fileID: 11400000, guid: cdb973429f2e8e846929fe8f7de5b2a3, type: 2}
+  - {fileID: 11400000, guid: e3ae90ea016cef64d897063c894a4390, type: 2}
+  - {fileID: 11400000, guid: ac8849aab1e53c44ca80ce2649cb6c4f, type: 2}
   landscapes: 020000000200000003000000

@@ -109,6 +109,71 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning($"Necesita paisaje {card.Data.landscapeRequired} x{card.Data.landscapeAmount}.");
             return false;
         }
+        if (!LaneMatchesLandscape(laneIndex, card.Data))
+        {
+            Debug.LogWarning($"El carril {laneIndex + 1} no tiene paisaje {card.Data.landscapeRequired}.");
+            return false;
+        }
+        if (!ActivePlayer.CanAfford(card.Data.actionCost)) { Debug.LogWarning("Sin acciones."); return false; }
+
+        CardInstance existing = ActivePlayer.CreatureLanes[laneIndex];
+        if (existing != null && existing.CurrentState == CardState.Flooped)
+        {
+            Debug.LogWarning("No puedes reemplazar una criatura Flooped.");
+            return false;
+        }
+
+        ActivePlayer.SpendActions(card.Data.actionCost);
+        ActivePlayer.PlaceCreature(card, laneIndex);
+        ApplyOnEnterPassives(card, laneIndex);
+        GameEvents.OnCardPlayed?.Invoke(ActivePlayerIndex, laneIndex, card);
+        ActionsPanel.Instance?.ShowNotification($"¡{card.Data.cardName} colocada en Carril {laneIndex + 1}!");
+        return true;
+    }
+
+    public bool TryPlayBuilding(CardInstance card, int laneIndex)
+    {
+        if (CurrentState != GameState.Actions) return false;
+        if (!ActivePlayer.Hand.Contains(card)) return false;
+        if (card.Data.cardType != CardType.Building) return false;
+        if (!ActivePlayer.MeetsLandscapeRequirement(card.Data)) return false;
+        if (!LaneMatchesLandscape(laneIndex, card.Data)) return false;
+        if (!ActivePlayer.CanAfford(card.Data.actionCost)) return false;
+
+        ActivePlayer.SpendActions(card.Data.actionCost);
+        ActivePlayer.PlaceBuilding(card, laneIndex);
+        ApplyBuildingPassive(card, laneIndex);
+        GameEvents.OnCardPlayed?.Invoke(ActivePlayerIndex, laneIndex, card);
+        ActionsPanel.Instance?.ShowNotification($"¡{card.Data.cardName} construida en Carril {laneIndex + 1}!");
+        return true;
+    }
+
+    public bool TryPlaySpell(CardInstance card, int laneIndex = -1)
+    {
+        if (CurrentState != GameState.Actions) return false;
+        if (!ActivePlayer.Hand.Contains(card)) return false;
+        if (card.Data.cardType != CardType.Spell) return false;
+        if (!ActivePlayer.MeetsLandscapeRequirement(card.Data)) return false;
+
+        bool isFree = card.Data.landscapeRequired == LandscapeType.Rainbow
+                   && card.Data.actionCost == 0;
+
+        if (!isFree && !ActivePlayer.CanAfford(card.Data.actionCost)) return false;
+        if (!isFree) ActivePlayer.SpendActions(card.Data.actionCost);
+
+        ResolveSpellEffect(card, laneIndex);
+        ActivePlayer.DiscardSpell(card);
+
+        GameEvents.OnCardPlayed?.Invoke(ActivePlayerIndex, laneIndex, card);
+        ActionsPanel.Instance?.ShowNotification($"¡{card.Data.cardName} lanzado!");
+        return true;
+    }
+
+    private bool LaneMatchesLandscape(int laneIndex, CardData cardData)
+    {
+        if (cardData.landscapeRequired == LandscapeType.Rainbow) return true;
+        return ActivePlayer.Landscapes[laneIndex] == cardData.landscapeRequired;
+    }
         if (!ActivePlayer.CanAfford(card.Data.actionCost)) { Debug.LogWarning("Sin acciones."); return false; }
 
         CardInstance existing = ActivePlayer.CreatureLanes[laneIndex];
