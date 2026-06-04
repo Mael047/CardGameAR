@@ -64,8 +64,15 @@ public class ARPlacementManager : MonoBehaviour
         if (success)
         {
             Debug.Log($"AR: {cardInHand.Data.cardName} jugada con éxito en el carril {waitingLaneIndex}!");
-            waitingLaneIndex = -1; // Reset
         }
+        else
+        {
+            Debug.LogWarning($"AR: No se pudo jugar {cardInHand.Data.cardName} en carril {waitingLaneIndex}.");
+            ActionsPanel.Instance?.ShowNotification(
+                $"No se puede colocar {cardInHand.Data.cardName} en el carril {waitingLaneIndex + 1}.");
+        }
+
+        waitingLaneIndex = -1; // Reset siempre, haya éxito o no
     }
 
     private CardInstance FindCardInHand(string qrID)

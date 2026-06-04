@@ -187,6 +187,10 @@ public class ActionsPanel : MonoBehaviour
                 SetInstruction($"Este carril es {laneLandscape}, pero " +
                                $"{pendingCard.Data.cardName} requiere {pendingCard.Data.landscapeRequired}.");
             }
+            else
+            {
+                SetInstruction($"No se puede colocar {pendingCard.Data.cardName} aquí.");
+            }
             return;
         }
 
