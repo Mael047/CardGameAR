@@ -20,25 +20,29 @@ public class ARPlacementManager : MonoBehaviour
     {
         waitingLaneIndex = laneIndex;
         Debug.Log($"AR: Carril {laneIndex} seleccionado mediante UI. Esperando escaneo...");
+
+        // Si ya hay una carta siendo trackeada y está en la mano, reintentar
+        if (ARManager.Instance.GetTrackedCardInHand(out string qrID, out Vector3 pos))
+            TryPlaceCard(qrID, pos);
     }
 
     // Paso 2: El ARCardTracker llama a esto cuando detecta la tarjeta
-    public void TryPlaceCard(string qrID, Vector3 worldPosition)
+    // Retorna true si la carta se colocó exitosamente
+    public bool TryPlaceCard(string qrID, Vector3 worldPosition)
     {
         if (waitingLaneIndex == -1)
         {
             Debug.LogWarning("AR: Se detectó una carta, pero no hay un carril seleccionado en la UI.");
-            return;
+            return false;
         }
 
         CardInstance cardInHand = FindCardInHand(qrID);
         if (cardInHand == null)
         {
             Debug.LogWarning($"AR: La carta con ID {qrID} no está en tu mano.");
-            return;
+            return false;
         }
 
-        // --- NUEVA LÓGICA INTELIGENTE ---
         bool success = false;
 
         switch (cardInHand.Data.cardType)
@@ -59,20 +63,21 @@ public class ARPlacementManager : MonoBehaviour
                 Debug.LogWarning($"AR: Tipo de carta desconocido: {cardInHand.Data.cardType}");
                 break;
         }
-        // --------------------------------
 
         if (success)
         {
             Debug.Log($"AR: {cardInHand.Data.cardName} jugada con éxito en el carril {waitingLaneIndex}!");
+            waitingLaneIndex = -1;
         }
         else
         {
             Debug.LogWarning($"AR: No se pudo jugar {cardInHand.Data.cardName} en carril {waitingLaneIndex}.");
             ActionsPanel.Instance?.ShowNotification(
                 $"No se puede colocar {cardInHand.Data.cardName} en el carril {waitingLaneIndex + 1}.");
+            waitingLaneIndex = -1;
         }
 
-        waitingLaneIndex = -1; // Reset siempre, haya éxito o no
+        return success;
     }
 
     private CardInstance FindCardInHand(string qrID)

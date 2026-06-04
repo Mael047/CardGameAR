@@ -6,8 +6,6 @@ public class ARCardTracker : MonoBehaviour
     [Header("Identidad")]
     public string qrID;
 
-    private bool hasBeenPlayed = false;
-
     [Header("Detección de Floop por orientación")]
     [Range(30f, 80f)]
     public float floopAngleThreshold = 60f;
@@ -33,14 +31,12 @@ public class ARCardTracker : MonoBehaviour
     {
         if (observer != null)
             observer.OnTargetStatusChanged += OnStatusChanged;
-        GameEvents.OnTurnChanged += OnTurnChanged;
     }
 
     private void OnDisable()
     {
         if (observer != null)
             observer.OnTargetStatusChanged -= OnStatusChanged;
-        GameEvents.OnTurnChanged -= OnTurnChanged;
     }
 
     private void Update()
@@ -59,11 +55,11 @@ public class ARCardTracker : MonoBehaviour
             trackedCardInstance = ARManager.Instance.FindCardInstance(qrID);
             ARManager.Instance.RegisterTracker(qrID, this);
 
-            if (!hasBeenPlayed)
+            // Solo intenta colocar si la carta sigue en la mano
+            if (trackedCardInstance != null && GameManager.Instance?.ActivePlayer?.Hand.Contains(trackedCardInstance) == true)
             {
                 Vector3 worldPos = transform.position;
                 ARPlacementManager.Instance.TryPlaceCard(qrID, worldPos);
-                hasBeenPlayed = true;
             }
         }
         else
@@ -72,12 +68,6 @@ public class ARCardTracker : MonoBehaviour
             floopTriggeredThisDetection = false;
             ARManager.Instance.UnregisterTracker(qrID);
         }
-    }
-
-    private void OnTurnChanged(int activePlayerIndex)
-    {
-        hasBeenPlayed = false;
-        Debug.Log($"Tracker [{qrID}] reseteado para el nuevo turno.");
     }
 
     private void CheckFloopOrientation()
