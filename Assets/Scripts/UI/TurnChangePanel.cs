@@ -20,7 +20,8 @@ public class TurnChangePanel : MonoBehaviour
     {
         if (canvasGroup == null)
             canvasGroup = GetComponent<CanvasGroup>();
-        gameObject.SetActive(false);
+        canvasGroup.alpha = 0f;
+        canvasGroup.blocksRaycasts = false;
     }
 
     private void OnEnable()
