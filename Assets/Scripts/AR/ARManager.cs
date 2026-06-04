@@ -202,27 +202,4 @@ public class ARManager : MonoBehaviour
     // Devuelve cuántos trackers están activos (útil para debug)
     public int ActiveTrackerCount => activeTrackers.Count;
 
-    // Busca si hay alguna carta siendo trackeada que aún esté en la mano del jugador activo
-    public bool GetTrackedCardInHand(out string qrID, out Vector3 position)
-    {
-        qrID = null;
-        position = Vector3.zero;
-
-        PlayerState activePlayer = GameManager.Instance?.ActivePlayer;
-        if (activePlayer == null) return false;
-
-        foreach (var kvp in activeTrackers)
-        {
-            if (kvp.Value == null || !kvp.Value.IsTracked) continue;
-            CardInstance instance = FindCardInstance(kvp.Key);
-            if (instance != null && activePlayer.Hand.Contains(instance))
-            {
-                qrID = kvp.Key;
-                position = kvp.Value.transform.position;
-                return true;
-            }
-        }
-        return false;
-    }
-
 }

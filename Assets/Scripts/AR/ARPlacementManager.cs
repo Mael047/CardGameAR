@@ -20,10 +20,6 @@ public class ARPlacementManager : MonoBehaviour
     {
         waitingLaneIndex = laneIndex;
         Debug.Log($"AR: Carril {laneIndex} seleccionado mediante UI. Esperando escaneo...");
-
-        // Si ya hay una carta siendo trackeada y está en la mano, reintentar
-        if (ARManager.Instance.GetTrackedCardInHand(out string qrID, out Vector3 pos))
-            TryPlaceCard(qrID, pos);
     }
 
     // Paso 2: El ARCardTracker llama a esto cuando detecta la tarjeta
