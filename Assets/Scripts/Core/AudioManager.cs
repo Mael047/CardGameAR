@@ -1,21 +1,21 @@
 using UnityEngine;
+using FMODUnity;
+using FMOD.Studio;
 
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
 
-    [Header("Fuentes")]
-    [SerializeField] private AudioSource musicSource;
-    [SerializeField] private AudioSource sfxSource;
-
     [Header("Música")]
-    [SerializeField] private AudioClip bgMusic;
+    [SerializeField] private EventReference bgMusic;
 
     [Header("UI")]
-    [SerializeField] private AudioClip turnChangeSFX;
-    [SerializeField] private AudioClip buttonClickSFX;
-    [SerializeField] private AudioClip fightSFX;
-    [SerializeField] private AudioClip gameOverSFX;
+    [SerializeField] private EventReference turnChangeSFX;
+    [SerializeField] private EventReference buttonClickSFX;
+    [SerializeField] private EventReference fightSFX;
+    [SerializeField] private EventReference gameOverSFX;
+
+    private EventInstance musicInstance;
 
     private void Awake()
     {
@@ -25,12 +25,17 @@ public class AudioManager : MonoBehaviour
 
     private void Start()
     {
-        if (musicSource != null && bgMusic != null)
+        if (!bgMusic.IsNull)
         {
-            musicSource.clip = bgMusic;
-            musicSource.loop = true;
-            musicSource.Play();
+            musicInstance = RuntimeManager.CreateInstance(bgMusic);
+            musicInstance.start();
         }
+    }
+
+    private void OnDestroy()
+    {
+        musicInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+        musicInstance.release();
     }
 
     private void OnEnable()
@@ -55,10 +60,10 @@ public class AudioManager : MonoBehaviour
         GameEvents.OnGameOver -= HandleGameOver;
     }
 
-    public void PlaySFX(AudioClip clip)
+    public void PlaySFX(EventReference eventRef)
     {
-        if (clip != null && sfxSource != null)
-            sfxSource.PlayOneShot(clip);
+        if (!eventRef.IsNull)
+            RuntimeManager.PlayOneShot(eventRef);
     }
 
     public void PlayButtonClick()
@@ -80,7 +85,7 @@ public class AudioManager : MonoBehaviour
     private void HandleCardPlayed(int playerIndex, int laneIndex, CardInstance card)
     {
         if (card.Data.cardType == CardType.Spell)
-            PlaySFX(card.Data.spellSFX);
+            PlaySFX(card.Data.spellSFX); // Este campo en CardData también debe ser EventReference
     }
 
     private void HandleCreatureAttacked(int playerIndex, int laneIndex, int damage)
@@ -88,7 +93,7 @@ public class AudioManager : MonoBehaviour
         PlayerState player = GameManager.Instance.Players[playerIndex];
         CardInstance attacker = player.CreatureLanes[laneIndex];
         if (attacker != null)
-            PlaySFX(attacker.Data.attackSFX);
+            PlaySFX(attacker.Data.attackSFX); // EventReference en CardData
     }
 
     private void HandleFloopActivated(int playerIndex, int laneIndex)
@@ -96,12 +101,12 @@ public class AudioManager : MonoBehaviour
         PlayerState player = GameManager.Instance.Players[playerIndex];
         CardInstance creature = player.CreatureLanes[laneIndex];
         if (creature != null)
-            PlaySFX(creature.Data.floopSFX);
+            PlaySFX(creature.Data.floopSFX); // EventReference en CardData
     }
 
     private void HandleDamageTaken(int playerIndex, int laneIndex, CardInstance card)
     {
-        PlaySFX(card.Data.damageSFX);
+        PlaySFX(card.Data.damageSFX); // EventReference en CardData
     }
 
     private void HandleGameOver(int winnerIndex)

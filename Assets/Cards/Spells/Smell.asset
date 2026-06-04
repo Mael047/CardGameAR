@@ -29,3 +29,35 @@ MonoBehaviour:
   buildingPrefab: {fileID: 0}
   floopAnimation: {fileID: 0}
   spellEffect: {fileID: 0}
+  attackSFX:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  damageSFX:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  floopSFX:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  spellSFX:
+    Guid:
+      Data1: -1034750578
+      Data2: 1204219779
+      Data3: 281532083
+      Data4: -95517355
+    Path: event:/Hechizos/H_Ugh
+  idleAnimation: {fileID: 0}
+  attackAnimation: {fileID: 0}
+  damageAnimation: {fileID: 0}
+  deathAnimation: {fileID: 0}

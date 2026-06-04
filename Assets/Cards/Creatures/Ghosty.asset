@@ -25,5 +25,38 @@ MonoBehaviour:
   abilityActionCost: 0
   abilityDescription: "Si el oponente tiene m\xE1s HP que t\xFA, gana +2 ATK"
   creaturePrefab: {fileID: 171927380109893388, guid: 373c1ca866fb6584c8b55b652197d98e, type: 3}
+  buildingPrefab: {fileID: 0}
   floopAnimation: {fileID: 1827226128182048838, guid: 6390c4d922564fc408e719e8d4083482, type: 3}
   spellEffect: {fileID: 0}
+  attackSFX:
+    Guid:
+      Data1: 1815636355
+      Data2: 1080165910
+      Data3: 661049253
+      Data4: 1245689298
+    Path: event:/ATK/A_Ghosty
+  damageSFX:
+    Guid:
+      Data1: -1350269015
+      Data2: 1082842163
+      Data3: 203237765
+      Data4: -1799580233
+    Path: event:/DMG/D_Ghosty
+  floopSFX:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  spellSFX:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  idleAnimation: {fileID: 0}
+  attackAnimation: {fileID: 0}
+  damageAnimation: {fileID: 0}
+  deathAnimation: {fileID: 0}

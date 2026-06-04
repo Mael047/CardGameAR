@@ -34,10 +34,10 @@ public class CardData : ScriptableObject
     public ParticleSystem spellEffect;
 
     [Header("Audio")]
-    public AudioClip attackSFX;
-    public AudioClip damageSFX;
-    public AudioClip floopSFX;
-    public AudioClip spellSFX;
+    public FMODUnity.EventReference attackSFX;
+    public FMODUnity.EventReference damageSFX;
+    public FMODUnity.EventReference floopSFX;
+    public FMODUnity.EventReference spellSFX;
 
     [Header("Animaciones")]
     public AnimationClip idleAnimation;
