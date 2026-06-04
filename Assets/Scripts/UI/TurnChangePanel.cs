@@ -68,8 +68,6 @@ public class TurnChangePanel : MonoBehaviour
             yield return null;
         }
         canvasGroup.alpha = 0f;
-
-        gameObject.SetActive(false);
     }
 
     private void OnDestroy()
